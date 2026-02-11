@@ -2024,7 +2024,7 @@
                                 <span>Account Settings</span>
                             </a> --}}
                             <div class="dropdown-divider"></div>
-                            <a href="./auth-login-minimal.html" class="dropdown-item">
+                            <a href="/" class="dropdown-item">
                                 <i class="feather-log-out"></i>
                                 <span>Logout</span>
                             </a>
@@ -2131,7 +2131,7 @@
         </div>
         <!-- [ Footer ] start -->
         <footer class="footer">
-            <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
+            {{-- <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
                 <span>Copyright ©</span>
                 <script>
                     document.write(new Date().getFullYear());
@@ -2142,7 +2142,7 @@
                 <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Help</a>
                 <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Terms</a>
                 <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Privacy</a>
-            </div>
+            </div> --}}
         </footer>
         <!-- [ Footer ] end -->
     </main>
