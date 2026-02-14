@@ -109,7 +109,7 @@
                                         <th class="border-0">KATEGORI</th>
                                         <th class="border-0">HARGA</th>
                                         <th class="border-0 text-center">STOK</th>
-                                        <th class="border-0 text-end pe-4">AKSI</th>
+                                        {{-- <th class="border-0 text-end pe-4">AKSI</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -132,14 +132,14 @@
                                                     {{ $product->total_stock }} Unit
                                                 </span>
                                             </td>
-                                            <td class="text-end pe-4">
+                                            {{-- <td class="text-end pe-4">
                                                 <div class="hstack gap-2 justify-content-end">
                                                     <button class="btn btn-icon btn-soft-info"
                                                         onclick="openModalRestock({{ $product->id }}, '{{ $product->name }}')">
                                                         <i class="feather feather-plus-circle"></i>
                                                     </button>
                                                 </div>
-                                            </td>
+                                            </td> --}}
                                         </tr>
                                     @endforeach
                                 </tbody>

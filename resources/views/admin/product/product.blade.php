@@ -65,7 +65,8 @@
                                                                 <i class="feather feather-edit"></i>
                                                             </a>
 
-                                                            <form action="{{ route('admin.products.destroy', $product->id) }}"
+                                                            <form
+                                                                action="{{ route('admin.products.destroy', $product->id) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 @method('DELETE')

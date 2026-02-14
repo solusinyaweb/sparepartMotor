@@ -11,6 +11,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Pelanggan</th>
+                        <th>Kode</th>
                         <th>Tanggal</th>
                         <th>Total</th>
                         <th class="text-center">Aksi</th>
@@ -21,8 +22,8 @@
                         <tr>
                             <td>
                                 <strong>{{ $order->user->name }}</strong><br>
-                                <small>ID: {{ $order->invoice }}</small>
                             </td>
+                            <td><small>ID: {{ $order->invoice }}</small></td>
                             <td>{{ $order->created_at->format('d M Y') }}</td>
                             <td><strong>Rp {{ number_format($order->total, 0, ',', '.') }}</strong></td>
                             <td class="text-center">
