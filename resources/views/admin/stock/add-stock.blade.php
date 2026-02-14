@@ -1,6 +1,24 @@
 @extends('index')
 
 @section('content')
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-close-circle me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Terjadi Kesalahan:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card stretch stretch-full border-0 shadow-sm">
@@ -15,20 +33,22 @@
                         </a>
                     </div>
 
-                    <form action="#" method="POST">
+                    <form action="{{ route('admin.stock.store') }}" method="POST">
+
                         @csrf
                         <div class="row">
                             <div class="col-md-8 mb-4">
                                 <label class="form-label fw-bold text-dark">Pilih Produk Sparepart</label>
                                 <select name="product_id" id="selectProduct" class="form-control" required>
-                                    <option value="">-- Cari Nama Produk atau Kode --</option>
-                                    <option value="1" data-stok="24" data-kode="BRK-001">Kampas Rem Depan Vario
-                                        (BRK-001)</option>
-                                    <option value="2" data-stok="5" data-kode="OIL-X1">Oli Mesin MPX2 1L (OIL-X1)
-                                    </option>
-                                    <option value="3" data-stok="10" data-kode="BS-NGK">Busi NGK Iridium (BS-NGK)
-                                    </option>
+                                    <option value="">-- Pilih Produk --</option>
+                                    @foreach ($products as $product)
+                                        <option value="{{ $product->id }}" data-stok="{{ $product->total_stock }}"
+                                            data-kode="{{ $product->code }}">
+                                            {{ $product->name }} ({{ $product->code }})
+                                        </option>
+                                    @endforeach
                                 </select>
+
                                 <div class="mt-2" id="productInfo" style="display: none;">
                                     <span class="badge bg-soft-info text-info">Kode: <span id="infoKode">-</span></span>
                                     <span class="badge bg-soft-success text-success ms-1">Stok Saat Ini: <span
@@ -39,9 +59,8 @@
                             <div class="col-md-4 mb-4">
                                 <label class="form-label fw-bold text-dark">Jumlah Stok Masuk</label>
                                 <div class="input-group">
-                                    <input type="number" name="jumlah_stok"
-                                        class="form-control form-control-lg border-end-0" placeholder="0" required
-                                        min="1">
+                                    <input type="number" name="quantity" class="form-control form-control-lg border-end-0"
+                                        placeholder="0" required min="1">
                                     <span class="input-group-text bg-white border-start-0 text-muted fw-bold">Unit</span>
                                 </div>
                             </div>
@@ -49,7 +68,7 @@
 
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark">Catatan / Keterangan (Opsional)</label>
-                            <textarea name="catatan" class="form-control" rows="2" placeholder="Contoh: Stok masuk dari Supplier Jaya Motor"></textarea>
+                            <textarea name="note" class="form-control" rows="2" placeholder="Contoh: Stok masuk dari Supplier Jaya Motor"></textarea>
                         </div>
 
                         <hr class="my-4 border-light">

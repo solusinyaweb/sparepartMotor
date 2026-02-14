@@ -6,11 +6,11 @@
             <div class="card stretch stretch-full">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Katalog Sparepart</h5>
-                    <a href="/cart-list" class="btn btn-warning position-relative">
+                    <a href="{{ route('customer.cart') }}" class="btn btn-warning position-relative">
                         <i class="feather feather-shopping-cart me-2"></i> Keranjang
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                             id="cart-count">
-                            0
+                            {{ session('cart') }}
                         </span>
                     </a>
                 </div>
@@ -29,18 +29,21 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="single-item">
-                                        <td><span class="badge bg-soft-primary text-primary">BRK-001</span></td>
-                                        <td class="fw-bold">Kampas Rem Honda Vario</td>
-                                        <td>Rp 45.000</td>
-                                        <td><span class="text-success">12 Pcs</span></td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-primary btn-tambah-keranjang"
-                                                onclick="tambahKeKeranjang('Kampas Rem Honda Vario')">
-                                                <i class="feather feather-shopping-cart me-1"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    @foreach ($products as $product)
+                                        <tr>
+                                            <td>{{ $product->code }}</td>
+                                            <td>{{ $product->name }}</td>
+                                            <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                                            <td>{{ $product->stocks->sum('quantity') }}</td>
+                                            <td>
+                                                <button onclick="addToCart({{ $product->id }})"
+                                                    class="btn btn-primary btn-sm">
+                                                    + Keranjang
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
                                 </tbody>
                             </table>
 
@@ -51,7 +54,8 @@
                                 <div class="col-sm-12 col-md-7 d-flex justify-content-end">
                                     <nav>
                                         <ul class="pagination">
-                                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a>
+                                            </li>
                                             <li class="page-item active"><a class="page-link" href="#">1</a></li>
                                             <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
                                         </ul>
@@ -66,13 +70,15 @@
     </div>
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="feather feather-check-circle me-2"></i>
                     <span id="toastMessage">Produk berhasil ditambah!</span>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -97,6 +103,19 @@
         }
     </style>
 
+        <script>
+            function addToCart(id) {
+                fetch('/customer/cart/add/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(() => {
+                    alert('Berhasil ditambah');
+                });
+            }
+    </script>
+
     <script>
         let count = 0;
 
@@ -108,7 +127,9 @@
             // 2. Munculkan Notifikasi Toast (Pengganti Alert)
             const toastEl = document.getElementById('cartToast');
             const toastMessage = document.getElementById('toastMessage');
-            const toast = new bootstrap.Toast(toastEl, { delay: 2000 }); // Hilang dalam 2 detik
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 2000
+            }); // Hilang dalam 2 detik
 
             toastMessage.innerText = namaProduk + " ditambah ke keranjang!";
             toast.show();

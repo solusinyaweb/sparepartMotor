@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Nota - {{ $order->kode_transaksi }}</title>
+    <title>Nota {{ $order->kode_transaksi }}</title>
     <style>
         body {
             font-family: sans-serif;
@@ -22,36 +22,26 @@
 
         .total {
             text-align: right;
-            font-size: 18px;
             font-weight: bold;
+            font-size: 18px;
             margin-top: 20px;
-        }
-
-        @media print {
-            .no-print {
-                display: none;
-            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="no-print">
-        <button onclick="window.print()">Cetak</button>
-        <hr>
-    </div>
-
-    <h2>NOTA PEMBELIAN</h2>
+    <h2>NOTA PENJUALAN</h2>
     <p>
-        ID: {{ $order->kode_transaksi }} <br>
+        ID: {{ $order->invoice }} <br>
+        Pelanggan: {{ $order->user->name }} <br>
         Tanggal: {{ $order->created_at->format('d M Y') }}
     </p>
 
     <table>
         <thead>
             <tr>
-                <th>Item</th>
+                <th>Produk</th>
                 <th>Qty</th>
                 <th>Harga</th>
                 <th>Subtotal</th>
@@ -59,11 +49,14 @@
         </thead>
         <tbody>
             @foreach ($order->items as $item)
-                <tr>
-                    <td>{{ $item->produk_nama }}</td>
+                <tr style="text-align: center">
+                    <td>{{ $item->product->name }}</td>
                     <td>{{ $item->qty }}</td>
-                    <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                    @php
+                        $subtotal = $item->price * $item->qty;
+                    @endphp
+                    <td>Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>

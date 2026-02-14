@@ -13,17 +13,17 @@
     <title>Sistem Sparepart Motor</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url('assets/images/favicon.ico') }}" />
     <!--! END: Favicon-->
     <!--! BEGIN: Bootstrap CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ url('assets/css/bootstrap.min.css') }}" />
     <!--! END: Bootstrap CSS-->
     <!--! BEGIN: Vendors CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/vendors/css/vendors.min.css" />
-    <link rel="stylesheet" type="text/css" href="assets/vendors/css/daterangepicker.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ url('assets/vendors/css/vendors.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url('assets/vendors/css/daterangepicker.min.css') }}" />
     <!--! END: Vendors CSS-->
     <!--! BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ url('assets/css/theme.min.css') }}" />
     <!--! END: Custom CSS-->
     <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
     <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
@@ -42,8 +42,8 @@
             <div class="m-header">
                 <a href="index.html" class="b-brand">
                     <!-- ========   change your logo hear   ============ -->
-                    <img src="assets/images/logo-full.png" alt="" class="logo logo-lg" />
-                    <img src="assets/images/logo-abbr.png" alt="" class="logo logo-sm" />
+                    <img src="{{ url('assets/images/logo-full.png') }}" alt="" class="logo logo-lg" />
+                    <img src="{{ url('assets/images/logo-abbr.png') }}" alt="" class="logo logo-sm" />
                 </a>
             </div>
             <div class="navbar-content">
@@ -1893,14 +1893,14 @@
                     </div> --}}
                     <div class="dropdown nxl-h-item">
                         <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
-                            <img src="assets/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0" />
+                            <img src="{{ url('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar me-0" />
                         </a>
                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                             <div class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <img src="assets/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar" />
+                                    <img src="{{ url('assets/images/avatar/1.png') }}" alt="user-image" class="img-fluid user-avtar" />
                                     <div>
-                                        <h6 class="text-dark mb-0">Alexandra Della</h6>
+                                        <h6 class="text-dark mb-0">{{ Auth::user()->name }}</h6>
                                         {{-- <span class="fs-12 fw-medium text-muted">alex@example.com</span> --}}
                                     </div>
                                 </div>
@@ -2024,10 +2024,11 @@
                                 <span>Account Settings</span>
                             </a> --}}
                             <div class="dropdown-divider"></div>
-                            <a href="/" class="dropdown-item">
+                            <form action="{{ route('logout') }}" method="POST" class="dropdown-item">
+                                @csrf
                                 <i class="feather-log-out"></i>
-                                <span>Logout</span>
-                            </a>
+                                <button type="submit" class="btn btn-light">Logout</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -2324,18 +2325,18 @@
     <!--! Footer Script !-->
     <!--! ================================================================ !-->
     <!--! BEGIN: Vendors JS !-->
-    <script src="assets/vendors/js/vendors.min.js"></script>
+    <script src="{{ url('assets/vendors/js/vendors.min.js') }}"></script>
     <!-- vendors.min.js {always must need to be top} -->
-    <script src="assets/vendors/js/daterangepicker.min.js"></script>
-    <script src="assets/vendors/js/apexcharts.min.js"></script>
-    <script src="assets/vendors/js/circle-progress.min.js"></script>
+    <script src="{{ url('assets/vendors/js/daterangepicker.min.js') }}"></script>
+    <script src="{{ url('assets/vendors/js/apexcharts.min.js') }}"></script>
+    <script src="{{ url('assets/vendors/js/circle-progress.min.js') }}"></script>
     <!--! END: Vendors JS !-->
     <!--! BEGIN: Apps Init  !-->
-    <script src="assets/js/common-init.min.js"></script>
-    <script src="assets/js/dashboard-init.min.js"></script>
+    <script src="{{ url('assets/js/common-init.min.js') }}"></script>
+    <script src="{{ url('assets/js/dashboard-init.min.js') }}"></script>
     <!--! END: Apps Init !-->
     <!--! BEGIN: Theme Customizer  !-->
-    <script src="assets/js/theme-customizer-init.min.js"></script>
+    <script src="{{ url('assets/js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
 </body>
 

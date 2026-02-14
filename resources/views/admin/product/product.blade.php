@@ -1,19 +1,28 @@
 @extends('index')
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-check-all me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card stretch stretch-full">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <div id="sparepartList_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                        <div class="dataTables_wrapper dt-bootstrap5 no-footer">
 
                             <div class="row p-4 pb-0">
                                 <div class="col-sm-12 col-md-6">
                                     <h5 class="mb-0">Daftar Stok Sparepart</h5>
                                 </div>
                                 <div class="col-sm-12 col-md-6 d-flex justify-content-end">
-                                    <a href="/add-product" class="btn btn-primary btn-sm mb-3 text-white">
+                                    <a href="{{ route('admin.products.create') }}"
+                                        class="btn btn-primary btn-sm mb-3 text-white">
                                         <i class="feather feather-plus me-1"></i> Tambah Sparepart
                                     </a>
                                 </div>
@@ -21,84 +30,58 @@
 
                             <div class="row dt-row">
                                 <div class="col-sm-12">
-                                    <table class="table table-hover dataTable no-footer" id="sparepartList"
-                                        aria-describedby="sparepartList_info">
+                                    <table class="table table-hover dataTable no-footer">
                                         <thead>
                                             <tr>
-                                                <th class="sorting" style="width: 120px;">Kode</th>
-                                                <th class="sorting">Nama Sparepart</th>
-                                                <th class="sorting">Kategori</th>
-                                                <th class="sorting">Harga</th>
-                                                <th class="sorting" style="width: 80px;">Stok</th>
+                                                <th style="width: 120px;">Kode</th>
+                                                <th>Nama Sparepart</th>
+                                                <th>Kategori</th>
+                                                <th>Harga</th>
                                                 <th class="text-start" style="width: 100px;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr class="single-item odd">
-                                                <td><span class="badge bg-soft-primary text-primary">BRK-001</span></td>
-                                                <td class="fw-bold">Kampas Rem Depan</td>
-                                                <td><span class="text-muted">Pengereman</span></td>
-                                                <td>Rp 85.000</td>
-                                                <td>
-                                                    <span class="fw-bold text-success">24</span>
-                                                </td>
-                                                <td>
-                                                    <div class="hstack gap-2 justify-content-start">
-                                                        <a href="/edit-product" class="avatar-text avatar-md"
-                                                            title="Edit">
-                                                            <i class="feather feather-edit"></i>
-                                                        </a>
-                                                        <a href="javascript:void(0);"
-                                                            class="avatar-text avatar-md text-danger" title="Hapus">
-                                                            <i class="feather feather-trash-2"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr class="single-item even">
-                                                <td><span class="badge bg-soft-primary text-primary">OIL-X1</span></td>
-                                                <td class="fw-bold">Oli Mesin 1L</td>
-                                                <td><span class="text-muted">Pelumas</span></td>
-                                                <td>Rp 65.000</td>
-                                                <td>
-                                                    <span class="fw-bold text-danger">5</span>
-                                                    <i class="feather feather-alert-circle text-danger"
-                                                        title="Stok Menipis"></i>
-                                                </td>
-                                                <td>
-                                                    <div class="hstack gap-2 justify-content-start">
-                                                        <a href="/edit-sparepart" class="avatar-text avatar-md">
-                                                            <i class="feather feather-edit"></i>
-                                                        </a>
-                                                        <a href="javascript:void(0);"
-                                                            class="avatar-text avatar-md text-danger">
-                                                            <i class="feather feather-trash-2"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            @foreach ($products as $product)
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge bg-soft-primary text-primary">
+                                                            {{ $product->code }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="fw-bold">{{ $product->name }}</td>
+                                                    <td>
+                                                        <span class="text-muted">
+                                                            {{ $product->category }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                                                    </td>
+                                                    <td>
+                                                        <div class="hstack gap-2 justify-content-start">
+
+                                                            <a href="{{ route('admin.products.edit', $product->id) }}"
+                                                                class="avatar-text avatar-md" title="Edit">
+                                                                <i class="feather feather-edit"></i>
+                                                            </a>
+
+                                                            <form action="{{ route('admin.products.destroy', $product->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="avatar-text avatar-md text-danger border-0 bg-transparent"
+                                                                    onclick="return confirm('Yakin ingin menghapus data ini?')">
+                                                                    <i class="feather feather-trash-2"></i>
+                                                                </button>
+                                                            </form>
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-
-                            <div class="row p-4">
-                                <div class="col-sm-12 col-md-5">
-                                    <div class="dataTables_info" id="sparepartList_info" role="status" aria-live="polite">
-                                        Menampilkan 1 sampai 2 dari 2 entri
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-md-7">
-                                    <div class="dataTables_paginate paging_simple_numbers">
-                                        <ul class="pagination justify-content-end">
-                                            <li class="paginate_button page-item previous disabled"><a href="#"
-                                                    class="page-link">Previous</a></li>
-                                            <li class="paginate_button page-item active"><a href="#"
-                                                    class="page-link">1</a></li>
-                                            <li class="paginate_button page-item next disabled"><a href="#"
-                                                    class="page-link">Next</a></li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </div>
 

@@ -1,5 +1,12 @@
 @extends('index')
 @section('content')
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="mdi mdi-check-all me-2"></i>
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
     <div class="row">
         <div class="col-lg-12">
             <div class="card stretch stretch-full">
@@ -8,86 +15,58 @@
                         <div id="paymentList_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
                             <div class="row">
 
-    <div class="d-flex justify-content-end mb-3">
-    <a href="/add-account" class="btn btn-primary text-white">
-       <i class="feather feather-plus me-1"></i> Tambah Data
-    </a>
-</div>
-
-
+                                <div class="d-flex justify-content-end mb-3">
+                                    <a href="{{ route('admin.customers.create') }}" class="btn btn-primary text-white">
+                                        <i class="feather feather-plus me-1"></i> Tambah Data
+                                    </a>
+                                </div>
 
                             </div>
                             <div class="row dt-row">
                                 <div class="col-sm-12">
-                                    <table class="table table-hover dataTable no-footer" id="paymentList"
-                                        aria-describedby="paymentList_info">
+                                    <table class="table table-hover dataTable no-footer" id="paymentList">
                                         <thead>
                                             <tr>
-
-                                                <th class="sorting" tabindex="0" aria-controls="paymentList"
-                                                    rowspan="1" colspan="1"
-                                                    aria-label="Invoice: activate to sort column ascending"
-                                                    style="width: 61.0312px;">Nama Pelanggan</th>
-
-                                                <th class="text-start sorting" tabindex="0" aria-controls="paymentList"
-                                                    rowspan="1" colspan="1"
-                                                    aria-label="Actions: activate to sort column ascending"
-                                                    style="width: 95.1094px;">Alamat</th>
-                                                <th class="text-start sorting" tabindex="0" aria-controls="paymentList"
-                                                    rowspan="1" colspan="1"
-                                                    aria-label="Actions: activate to sort column ascending"
-                                                    style="width: 95.1094px;">No Telepon</th>
-                                                <th class="text-start sorting" tabindex="0" aria-controls="paymentList"
-                                                    rowspan="1" colspan="1"
-                                                    aria-label="Actions: activate to sort column ascending"
-                                                    style="width: 95.1094px;">Aksi</th>
+                                                <th>Nama Pelanggan</th>
+                                                <th class="text-start">Email</th>
+                                                <th class="text-start">Alamat</th>
+                                                <th class="text-start">No Telepon</th>
+                                                <th class="text-start">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr class="single-item odd">
+                                            @foreach ($customers as $customer)
+                                                <tr class="single-item odd">
+                                                    <td>{{ $customer->name }}</td>
+                                                    <td>{{ $customer->email }}</td>
+                                                    <td>{{ $customer->address }}</td>
+                                                    <td>{{ $customer->phone }}</td>
 
-                                                <td>321456</td>
-                                                <td>321456</td>
-                                                <td>321456</td>
+                                                    <td>
+                                                        <div class="hstack gap-2 justify-content-start">
 
+                                                            <a href="{{ route('admin.customers.edit', $customer->id) }}"
+                                                                class="avatar-text avatar-md">
+                                                                <i class="feather feather-edit"></i>
+                                                            </a>
 
-                                                <td>
-                                                    <div class="hstack gap-2 justify-content-start">
+                                                            <form action="{{ route('admin.customers.destroy', $customer->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="avatar-text avatar-md border-0 bg-transparent"
+                                                                    onclick="return confirm('Yakin ingin menghapus data ini?')">
+                                                                    <i class="feather feather-trash-2"></i>
+                                                                </button>
+                                                            </form>
 
-                                                        <a href="/edit-account" class="avatar-text avatar-md">
-                                                            <i class="feather feather-edit"></i>
-                                                        </a>
-                                                        <a href="javascript:void(0);" class="avatar-text avatar-md">
-                                                            <i class="feather feather-trash-2"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12 col-md-5">
-                                    <div class="dataTables_info" id="paymentList_info" role="status"
-                                        aria-live="polite">Showing 1 to 10 of 10 entries</div>
-                                </div>
-                                <div class="col-sm-12 col-md-7">
-                                    <div class="dataTables_paginate paging_simple_numbers" id="paymentList_paginate">
-                                        <ul class="pagination">
-                                            <li class="paginate_button page-item previous disabled"
-                                                id="paymentList_previous"><a href="#" aria-controls="paymentList"
-                                                    data-dt-idx="previous" tabindex="0" class="page-link">Previous</a>
-                                            </li>
-                                            <li class="paginate_button page-item active"><a href="#"
-                                                    aria-controls="paymentList" data-dt-idx="0" tabindex="0"
-                                                    class="page-link">1</a></li>
-                                            <li class="paginate_button page-item next disabled" id="paymentList_next"><a
-                                                    href="#" aria-controls="paymentList" data-dt-idx="next"
-                                                    tabindex="0" class="page-link">Next</a></li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </div>
                         </div>
