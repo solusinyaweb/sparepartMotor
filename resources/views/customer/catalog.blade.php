@@ -39,7 +39,8 @@
                                             <td class="fw-bold">{{ $product->code }}</td>
                                             <td>{{ $product->name }}</td>
                                             <td><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong></td>
-                                            <td>{{ $product->stocks->sum('quantity') }}</td>
+                                            {{-- <td>{{ $product->stocks->sum('quantity') }}</td> --}}
+                                            <td>{{ $product->total_stock }}</td>
                                             <td class="text-center">
                                                 {{-- Mengirim ID dan Nama Produk ke JavaScript --}}
                                                 <button onclick="addToCart({{ $product->id }}, '{{ $product->name }}')"

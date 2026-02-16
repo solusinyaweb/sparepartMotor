@@ -120,7 +120,7 @@
             const order = dataOrders.find(o => o.id == id);
             if (!order) return;
 
-            const invoiceCode = order.invoice || order.kode_transaksi || order.no_invoice || ('INV-' + order.id);
+            const invoiceCode = order.invoice || order.invoice || order.invoice || ('INV-' + order.id);
             document.getElementById('orderKode').innerText = '#' + invoiceCode;
 
             let html = '';

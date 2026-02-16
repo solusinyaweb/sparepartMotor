@@ -68,7 +68,7 @@
                                 <td class="text-center">
                                     @if ($order->payment_proof)
                                         <button class="btn btn-sm btn-light border"
-                                            onclick="viewImage('{{ asset('storage/' . $order->payment_proof) }}')">
+                                            onclick="viewImage('{{ url('storage/payment_proof/' . $order->payment_proof) }}')">
                                             <i class="bi bi-image"></i> Lihat
                                         </button>
                                     @else

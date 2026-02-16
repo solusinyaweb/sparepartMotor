@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CatalogController extends Controller
 {
@@ -77,7 +79,6 @@ class CatalogController extends Controller
         return back();
     }
 
-
     public function checkout(Request $request)
     {
         $request->validate([
@@ -86,43 +87,95 @@ class CatalogController extends Controller
 
         $cart = session()->get('cart');
 
-        if (!$cart) {
+        if (!$cart || count($cart) == 0) {
             return back()->with('error', 'Keranjang kosong');
         }
 
-        $total = 0;
+        DB::beginTransaction();
 
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['qty'];
-        }
+        try {
 
-        $invoice = 'INV-' . time();
+            $total = 0;
 
-        $file = $request->file('payment_proof');
-        $filename = $invoice . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('uploads'), $filename);
+            // ==============================
+            // 1️⃣ CEK SEMUA STOK DULU
+            // ==============================
+            foreach ($cart as $id => $item) {
 
-        $order = Order::create([
-            'user_id' => Auth::user()->id,
-            'invoice' => $invoice,
-            'total' => $total,
-            'payment_proof' => $filename,
-            'status' => 'paid'
-        ]);
+                $product = Product::with('stocks')->findOrFail($id);
 
-        foreach ($cart as $id => $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $id,
-                'qty' => $item['qty'],
-                'price' => $item['price']
+                $stockIn = $product->stocks()->where('type', 'in')->sum('quantity');
+                $stockOut = $product->stocks()->where('type', 'out')->sum('quantity');
+
+                $currentStock = $stockIn - $stockOut;
+
+                if ($currentStock < $item['qty']) {
+                    DB::rollBack();
+                    return back()->with('error', 'Stok tidak cukup untuk produk ' . $product->name);
+                }
+
+                $total += $item['price'] * $item['qty'];
+            }
+
+            // ==============================
+            // 2️⃣ BUAT INVOICE
+            // ==============================
+            $invoice = 'INV-' . time();
+
+            $file = $request->file('payment_proof');
+            $filename = $invoice . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('payment_proof', $filename, 'public');
+
+            // ==============================
+            // 3️⃣ BUAT ORDER
+            // ==============================
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'invoice' => $invoice,
+                'total' => $total,
+                'payment_proof' => $filename,
+                'status' => 'paid'
             ]);
+
+            // ==============================
+            // 4️⃣ SIMPAN ORDER ITEM + STOCK OUT
+            // ==============================
+            foreach ($cart as $id => $item) {
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $id,
+                    'qty' => $item['qty'],
+                    'price' => $item['price']
+                ]);
+
+                // Catat stok keluar (OUT)
+                Stock::create([
+                    'product_id' => $id,
+                    'quantity' => $item['qty'],
+                    'type' => 'out',
+                    'note' => 'Penjualan - Invoice ' . $invoice
+                ]);
+            }
+
+            // ==============================
+            // 5️⃣ CLEAR CART
+            // ==============================
+            session()->forget('cart');
+
+            DB::commit();
+
+            return redirect()
+                ->route('customer.catalog')
+                ->with('success', 'Transaksi berhasil');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', 'Terjadi kesalahan saat checkout');
         }
-
-        session()->forget('cart');
-
-        return redirect()->route('customer.catalog')->with('success', 'Transaksi berhasil');
     }
+
 
     public function history()
     {

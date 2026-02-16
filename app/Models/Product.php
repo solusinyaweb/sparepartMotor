@@ -13,16 +13,17 @@ class Product extends Model
         return $this->hasMany(Stock::class);
     }
 
-    public function orderItems()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
-
     public function getTotalStockAttribute()
     {
         $in = $this->stocks()->where('type', 'in')->sum('quantity');
         $out = $this->stocks()->where('type', 'out')->sum('quantity');
+
         return $in - $out;
+    }
+
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }
