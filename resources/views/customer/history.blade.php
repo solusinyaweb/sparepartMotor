@@ -1,6 +1,64 @@
 @extends('index')
 
 @section('content')
+    <style>
+        .table thead th {
+            font-size: 0.75rem;
+            border-top: none;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .shadow-xs {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-content {
+            border-radius: 1rem;
+        }
+
+        .bg-light {
+            background-color: #f8f9fa !important;
+        }
+
+        .badge.bg-light.text-primary {
+            background-color: #f0f4ff !important;
+        }
+
+        /* Memastikan posisi modal di depan backdrop */
+        .modal {
+            z-index: 1060 !important;
+        }
+
+        /* .modal-backdrop {
+                    z-index: 1050 !important;
+                } */
+
+        .modal-backdrop {
+            backdrop-filter: none !important;
+            background-color: rgba(0, 0, 0, .5) !important;
+        }
+
+
+        /* FIX MODAL BLUR TOTAL */
+        .modal {
+            filter: none !important;
+            backdrop-filter: none !important;
+        }
+
+        .modal-content {
+            filter: none !important;
+            backdrop-filter: none !important;
+            opacity: 1 !important;
+        }
+
+        body.modal-open {
+            filter: none !important;
+        }
+    </style>
+
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-sm border-0 mb-4">
@@ -99,7 +157,9 @@
     </div>
 
     {{-- MODAL DETAIL --}}
-    <div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+        data-bs-focus="false">
+
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow border-0">
                 <div class="modal-header border-0 pb-0">
@@ -110,6 +170,11 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="fw-bold text-muted">Status Pesanan:</span>
+                        <span id="detailStatus" class="ms-2"></span>
+                    </div>
+
                     <div class="bg-light rounded-3 p-1">
                         <ul class="list-group list-group-flush rounded-3" id="detailList"></ul>
                     </div>
@@ -123,82 +188,81 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modalDetail');
+            if (modal && modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+        });
+    </script>
+
+
+    <script>
         const dataOrders = @json($orders);
 
         function showDetail(id) {
             const order = dataOrders.find(o => o.id == id);
             if (!order) return;
 
-            const invoiceCode = order.invoice || order.invoice || order.invoice || ('INV-' + order.id);
+            // Invoice
+            const invoiceCode = order.invoice || ('INV-' + order.id);
             document.getElementById('orderKode').innerText = '#' + invoiceCode;
 
+            // ===== STATUS =====
+            let statusHtml = '';
+            switch (order.status) {
+                case 'approved':
+                    statusHtml = `<span class="badge bg-success">Disetujui</span>`;
+                    break;
+                case 'pending':
+                    statusHtml = `<span class="badge bg-warning text-dark">Pending</span>`;
+                    break;
+                case 'paid':
+                    statusHtml = `<span class="badge bg-info">Menunggu Konfirmasi</span>`;
+                    break;
+                case 'rejected':
+                    statusHtml = `<span class="badge bg-danger">Ditolak</span>`;
+                    break;
+                default:
+                    statusHtml = `<span class="badge bg-secondary">Tidak Diketahui</span>`;
+            }
+            document.getElementById('detailStatus').innerHTML = statusHtml;
+            // ==================
+
+            // Items
             let html = '';
             const items = order.items || order.details || [];
 
             items.forEach(item => {
-                const namaBarang = item.product ?
-                    item.product.name :
-                    'Produk tidak dikenal';
-
+                const namaBarang = item.product ? item.product.name : 'Produk tidak dikenal';
                 const hargaSatuan = item.harga || item.price || 0;
                 const qty = item.qty || 0;
                 const subTotal = item.subtotal || (hargaSatuan * qty);
 
                 html += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
-                        <div style="max-width: 70%;">
-                            <div class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">${namaBarang}</div>
-                            <span class="badge bg-white text-muted border fw-normal text-dark">${qty} pcs x Rp ${Number(hargaSatuan).toLocaleString('id-ID')}</span>
-                        </div>
-                        <span class="fw-bold text-dark">Rp ${Number(subTotal).toLocaleString('id-ID')}</span>
-                    </li>`;
+                <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
+                    <div style="max-width: 70%;">
+                        <div class="fw-bold text-dark mb-1">${namaBarang}</div>
+                        <span class="badge bg-white text-dark border">
+                            ${qty} pcs x Rp ${Number(hargaSatuan).toLocaleString('id-ID')}
+                        </span>
+                    </div>
+                    <span class="fw-bold text-dark">
+                        Rp ${Number(subTotal).toLocaleString('id-ID')}
+                    </span>
+                </li>`;
             });
 
-            document.getElementById('detailList').innerHTML = html ||
-                '<li class="list-group-item text-center py-3">Data barang tidak ditemukan</li>';
-            document.getElementById('detailTotal').innerText = "Rp " + Number(order.total).toLocaleString('id-ID');
+            document.getElementById('detailList').innerHTML =
+                html || '<li class="list-group-item text-center py-3">Data barang tidak ditemukan</li>';
 
+            document.getElementById('detailTotal').innerText =
+                "Rp " + Number(order.total).toLocaleString('id-ID');
+
+            // Show modal (TANPA appendChild)
             const modalEl = document.getElementById('modalDetail');
-            document.body.appendChild(modalEl);
-
             const myModal = new bootstrap.Modal(modalEl);
             myModal.show();
         }
     </script>
-
-    <style>
-        .table thead th {
-            font-size: 0.75rem;
-            border-top: none;
-        }
-
-        .table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .shadow-xs {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .modal-content {
-            border-radius: 1rem;
-        }
-
-        .bg-light {
-            background-color: #f8f9fa !important;
-        }
-
-        .badge.bg-light.text-primary {
-            background-color: #f0f4ff !important;
-        }
-
-        /* Memastikan posisi modal di depan backdrop */
-        .modal {
-            z-index: 1060 !important;
-        }
-
-        .modal-backdrop {
-            z-index: 1050 !important;
-        }
-    </style>
 @endsection
