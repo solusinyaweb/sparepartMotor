@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -35,43 +36,50 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $order = Order::with('items')->findOrFail($id);
+        DB::beginTransaction();
 
-        if ($request->status == 'approved') {
+        try {
 
-            foreach ($order->items as $item) {
+            $order = Order::with('items')->findOrFail($id);
 
-                // cek stok lagi biar aman
-                $stockIn = Stock::where('product_id', $item->product_id)
-                    ->where('type', 'in')
-                    ->sum('quantity');
+            // ==============================
+            // JIKA STATUS = REJECTED
+            // ==============================
+            if ($request->status == 'rejected') {
 
-                $stockOut = Stock::where('product_id', $item->product_id)
-                    ->where('type', 'out')
-                    ->sum('quantity');
+                // Pastikan hanya dikembalikan jika sebelumnya belum pernah rejected
+                if ($order->status != 'rejected') {
 
-                $availableStock = $stockIn - $stockOut;
+                    foreach ($order->items as $item) {
 
-                if ($availableStock < $item->qty) {
-                    return response()->json([
-                        'error' => 'Stok tidak cukup'
-                    ], 400);
+                        // Kembalikan stok dengan INSERT STOCK IN
+                        Stock::create([
+                            'product_id' => $item->product_id,
+                            'quantity'   => $item->qty,
+                            'type'       => 'in',
+                            'note'       => 'Pengembalian dari Order ' . $order->invoice
+                        ]);
+                    }
                 }
-
-                // INSERT LOG STOCK OUT
-                // Stock::create([
-                //     'product_id' => $item->product_id,
-                //     'quantity' => $item->qty,
-                //     'type' => 'out',
-                //     'note' => 'Order ' . $order->invoice
-                // ]);
             }
+
+            // ==============================
+            // UPDATE STATUS
+            // ==============================
+            $order->status = $request->status;
+            $order->save();
+
+            DB::commit();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => 'Terjadi kesalahan server'
+            ], 500);
         }
-
-        $order->status = $request->status;
-        $order->save();
-
-        return response()->json(['success' => true]);
     }
 
 

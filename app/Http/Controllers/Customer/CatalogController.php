@@ -175,8 +175,6 @@ class CatalogController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat checkout');
         }
     }
-
-
     public function history()
     {
         $orders = Order::with('items.product', 'user')
