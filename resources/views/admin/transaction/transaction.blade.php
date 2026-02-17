@@ -5,16 +5,9 @@
         /* CSS Tambahan untuk memastikan modal berada di depan */
         .modal {
             background: rgba(0, 0, 0, 0.5);
-            /* Overlay gelap transparan */
         }
-
         #modalBukti {
-            z-index: 9999 !important;
-        }
-
-        .modal-backdrop {
-            display: none !important;
-            /* Kita gunakan background modal saja agar tidak double backdrop */
+            z-index: 1055 !important;
         }
     </style>
 
@@ -38,9 +31,9 @@
                             <th class="ps-3">Pelanggan</th>
                             <th>Detail</th>
                             <th>Total</th>
-                            <th class="">Bukti</th>
+                            <th>Bukti</th>
                             <th>Status</th>
-                            <th class="text-start">Aksi</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,45 +43,36 @@
                                     <strong>{{ $order->user->name }}</strong><br>
                                     <small class="text-muted">{{ $order->user->phone }}</small>
                                 </td>
-
                                 <td>
                                     <span class="badge bg-info text-dark fw-normal">
                                         {{ $order->items->count() }} Item
                                     </span>
-                                    <small class="d-block text-muted text-truncate" style="max-width: 150px;">
-                                        {{ $order->items->pluck('produk_nama')->take(2)->implode(', ') }}
-                                    </small>
                                 </td>
-
                                 <td>
-                                    <span class="fw-bold text-dark">Rp
-                                        {{ number_format($order->total, 0, ',', '.') }}</span>
+                                    <span class="fw-bold text-dark">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                                 </td>
-
-                                <td class="text-center">
+                                <td>
                                     @if ($order->payment_proof)
                                         <button class="btn btn-sm btn-light border"
-                                            onclick="viewImage('{{ url('storage/payment_proof/' . $order->payment_proof) }}')">
+                                            onclick="viewImage('{{ asset('storage/payment_proof/' . $order->payment_proof) }}')">
                                             <i class="bi bi-image"></i> Lihat
                                         </button>
                                     @else
                                         <span class="text-muted small">-</span>
                                     @endif
                                 </td>
-
                                 <td>
                                     @if ($order->status == 'pending' || $order->status == 'paid')
-                                        <span class="badge bg-warning">Menunggu</span>
+                                        <span class="badge bg-warning text-dark">Menunggu Verifikasi</span>
                                     @elseif($order->status == 'approved')
                                         <span class="badge bg-success">Disetujui</span>
                                     @else
                                         <span class="badge bg-danger">Ditolak</span>
                                     @endif
                                 </td>
-
-                                <td class="text-end pe-3">
-                                    @if ($order->status == 'paid')
-                                        <div class="d-flex justify-content-start gap-2">
+                                <td class="pe-3">
+                                    @if ($order->status == 'paid' || $order->status == 'pending')
+                                        <div class="d-flex gap-2">
                                             <button class="btn btn-success btn-sm px-3 fw-bold"
                                                 onclick="updateStatus({{ $order->id }}, 'approved')">
                                                 Terima
@@ -99,18 +83,13 @@
                                             </button>
                                         </div>
                                     @else
-                                        <div class="d-flex justify-content-start gap-2">
-                                            <span class="bg-warning bg-sm rounded-5 text-white px-3">
-                                                Selesai
-                                            </span>
-                                        </div>
+                                        <span class="badge bg-secondary">Selesai</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                     Tidak ada data transaksi.
                                 </td>
                             </tr>
@@ -124,29 +103,26 @@
     {{-- MODAL BUKTI --}}
     <div class="modal fade" id="modalBukti" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0">
+            <div class="modal-content border-0">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Bukti Pembayaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-2 text-center bg-light">
-                    <img id="previewBukti" src="" class="img-fluid rounded shadow-sm" alt="Bukti Transfer">
+                    <img id="previewBukti" src="" class="img-fluid rounded shadow-sm">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Gunakan variabel global untuk URL agar mudah diubah
+        const BASE_URL = "{{ url('/') }}";
+
         function viewImage(url) {
-            const modalElement = document.getElementById('modalBukti');
-
-            // PINDAHKAN MODAL KE BODY (Mencegah blur/tenggelam)
-            document.body.appendChild(modalElement);
-
             const imgElement = document.getElementById('previewBukti');
             imgElement.src = url;
-
-            const myModal = new bootstrap.Modal(modalElement);
+            const myModal = new bootstrap.Modal(document.getElementById('modalBukti'));
             myModal.show();
         }
 
@@ -154,28 +130,32 @@
             const pesan = status === 'approved' ? 'Terima pesanan ini?' : 'Tolak pesanan ini?';
             if (!confirm(pesan)) return;
 
-            fetch(`/admin/transaksi/${id}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: status
-                    })
+            // Pastikan URL ini sesuai dengan yang ada di php artisan route:list
+            fetch(`${BASE_URL}/admin/transaksi/${id}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: status,
+                    _method: 'POST' // Tambahkan ini jika di route menggunakan Route::post
                 })
-                .then(res => {
-                    if (res.ok) {
-                        location.reload();
-                    } else {
-                        alert('Gagal memperbarui status. Pastikan Route POST sudah benar.');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Terjadi kesalahan koneksi.');
-                });
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Status berhasil diperbarui!');
+                    location.reload();
+                } else {
+                    alert('Gagal: ' + (data.message || 'Terjadi kesalahan sistem.'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan koneksi ke server.');
+            });
         }
     </script>
 @endsection
