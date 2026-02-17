@@ -2,24 +2,25 @@
 
 @section('content')
     <style>
-        /* CSS Tambahan untuk memastikan modal berada di depan */
-        .modal {
-            background: rgba(0, 0, 0, 0.5);
-        }
+        /* Hilangkan CSS background manual yang sebelumnya agar tidak double */
         #modalBukti {
-            z-index: 1055 !important;
+            z-index: 9999 !important;
+        }
+
+        #previewBukti {
+            max-height: 85vh;
+            width: auto;
+            margin: auto;
+            display: block;
         }
     </style>
 
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
             <h5 class="fw-bold mb-0">Konfirmasi & Validasi Transaksi</h5>
-
             <div class="btn-group gap-2">
-                <a href="{{ route('admin.transaksi') }}"
-                    class="btn btn-outline-primary btn-sm {{ !request('status') ? 'active' : '' }}">Semua</a>
-                <a href="{{ route('admin.transaksi', ['status' => 'pending']) }}"
-                    class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
+                <a href="{{ route('admin.transaksi') }}" class="btn btn-outline-primary btn-sm {{ !request('status') ? 'active' : '' }}">Semua</a>
+                <a href="{{ route('admin.transaksi', ['status' => 'pending']) }}" class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
             </div>
         </div>
 
@@ -44,9 +45,7 @@
                                     <small class="text-muted">{{ $order->user->phone }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info text-dark fw-normal">
-                                        {{ $order->items->count() }} Item
-                                    </span>
+                                    <span class="badge bg-info text-dark fw-normal">{{ $order->items->count() }} Item</span>
                                 </td>
                                 <td>
                                     <span class="fw-bold text-dark">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
@@ -62,8 +61,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($order->status == 'pending' || $order->status == 'paid')
-                                        <span class="badge bg-warning text-dark">Menunggu Verifikasi</span>
+                                    @if (in_array($order->status, ['pending', 'paid']))
+                                        <span class="badge bg-warning text-dark">Menunggu</span>
                                     @elseif($order->status == 'approved')
                                         <span class="badge bg-success">Disetujui</span>
                                     @else
@@ -71,16 +70,10 @@
                                     @endif
                                 </td>
                                 <td class="pe-3">
-                                    @if ($order->status == 'paid' || $order->status == 'pending')
+                                    @if (in_array($order->status, ['pending', 'paid']))
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-success btn-sm px-3 fw-bold"
-                                                onclick="updateStatus({{ $order->id }}, 'approved')">
-                                                Terima
-                                            </button>
-                                            <button class="btn btn-danger btn-sm px-3 fw-bold"
-                                                onclick="updateStatus({{ $order->id }}, 'rejected')">
-                                                Tolak
-                                            </button>
+                                            <button class="btn btn-success btn-sm px-3 fw-bold" onclick="updateStatus({{ $order->id }}, 'approved')">Terima</button>
+                                            <button class="btn btn-danger btn-sm px-3 fw-bold" onclick="updateStatus({{ $order->id }}, 'rejected')">Tolak</button>
                                         </div>
                                     @else
                                         <span class="badge bg-secondary">Selesai</span>
@@ -88,11 +81,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    Tidak ada data transaksi.
-                                </td>
-                            </tr>
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Tidak ada data transaksi.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -100,29 +89,34 @@
         </div>
     </div>
 
-    {{-- MODAL BUKTI --}}
     <div class="modal fade" id="modalBukti" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Bukti Pembayaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-2 text-center bg-light">
-                    <img id="previewBukti" src="" class="img-fluid rounded shadow-sm">
+                <div class="modal-body p-1 text-center bg-dark">
+                    <img id="previewBukti" src="" class="img-fluid rounded" alt="Bukti Transfer">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Gunakan variabel global untuk URL agar mudah diubah
         const BASE_URL = "{{ url('/') }}";
 
         function viewImage(url) {
+            const modalElement = document.getElementById('modalBukti');
             const imgElement = document.getElementById('previewBukti');
+
+            // Trik utama: Pindahkan modal ke luar dari container agar tidak blur/terhalang
+            document.body.appendChild(modalElement);
+
             imgElement.src = url;
-            const myModal = new bootstrap.Modal(document.getElementById('modalBukti'));
+
+            // Gunakan instance Bootstrap Modal
+            let myModal = bootstrap.Modal.getOrCreateInstance(modalElement);
             myModal.show();
         }
 
@@ -130,7 +124,6 @@
             const pesan = status === 'approved' ? 'Terima pesanan ini?' : 'Tolak pesanan ini?';
             if (!confirm(pesan)) return;
 
-            // Pastikan URL ini sesuai dengan yang ada di php artisan route:list
             fetch(`${BASE_URL}/admin/transaksi/${id}/status`, {
                 method: 'POST',
                 headers: {
@@ -138,23 +131,19 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    status: status,
-                    _method: 'POST' // Tambahkan ini jika di route menggunakan Route::post
-                })
+                body: JSON.stringify({ status: status })
             })
             .then(async res => {
-                const data = await res.json();
                 if (res.ok) {
-                    alert('Status berhasil diperbarui!');
                     location.reload();
                 } else {
-                    alert('Gagal: ' + (data.message || 'Terjadi kesalahan sistem.'));
+                    const errorData = await res.json();
+                    alert('Gagal: ' + (errorData.message || 'Error Server'));
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert('Terjadi kesalahan koneksi ke server.');
+                alert('Terjadi kesalahan koneksi.');
             });
         }
     </script>
