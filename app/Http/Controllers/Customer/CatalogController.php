@@ -179,7 +179,7 @@ class CatalogController extends Controller
 
     public function history()
     {
-        $orders = Order::with('items')
+        $orders = Order::with('items.product', 'user')
             ->where('user_id', Auth::id())
             ->latest()
             ->get();

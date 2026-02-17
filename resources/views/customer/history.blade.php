@@ -18,10 +18,14 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">Informasi Invoice</th>
-                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">Total Pembayaran</th>
-                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">Status Pesanan</th>
-                                    <th class="text-center pe-4 py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">Opsi</th>
+                                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted"
+                                        style="letter-spacing: 0.5px;">Informasi Invoice</th>
+                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">
+                                        Total Pembayaran</th>
+                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">
+                                        Status Pesanan</th>
+                                    <th class="text-center pe-4 py-3 text-uppercase small fw-bold text-muted"
+                                        style="letter-spacing: 0.5px;">Opsi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -30,15 +34,18 @@
                                         <td class="ps-4 py-3">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    <div class="fw-bold text-dark mb-1">{{ $order->created_at->format('d M Y') }}</div>
-                                                    <span class="badge bg-light text-primary border border-primary border-opacity-25 fw-medium">
-                                                        #{{ $order->invoice ?? $order->kode_transaksi ?? $order->id }}
+                                                    <div class="fw-bold text-dark mb-1">
+                                                        {{ $order->created_at->format('d M Y') }}</div>
+                                                    <span
+                                                        class="badge bg-light text-primary border border-primary border-opacity-25 fw-medium">
+                                                        #{{ $order->invoice ?? ($order->kode_transaksi ?? $order->id) }}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <div class="text-dark fw-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</div>
+                                            <div class="text-dark fw-bold">Rp
+                                                {{ number_format($order->total, 0, ',', '.') }}</div>
                                             <small class="text-muted">Metode: Transfer</small>
                                         </td>
                                         <td class="py-3">
@@ -76,7 +83,8 @@
                                     <tr>
                                         <td colspan="4" class="text-center py-5">
                                             <div class="py-4">
-                                                <i class="feather feather-inbox fs-1 text-muted opacity-25 mb-3 d-block"></i>
+                                                <i
+                                                    class="feather feather-inbox fs-1 text-muted opacity-25 mb-3 d-block"></i>
                                                 <p class="text-muted mb-0">Belum ada riwayat invoice ditemukan.</p>
                                             </div>
                                         </td>
@@ -98,7 +106,8 @@
                     <h5 class="modal-title fw-bold text-dark">
                         Detail Invoice <span id="orderKode" class="text-primary opacity-75"></span>
                     </h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="bg-light rounded-3 p-1">
@@ -127,7 +136,10 @@
             const items = order.items || order.details || [];
 
             items.forEach(item => {
-                const namaBarang = item.produk_nama || (item.produk ? item.produk.name : 'Produk tidak dikenal');
+                const namaBarang = item.product ?
+                    item.product.name :
+                    'Produk tidak dikenal';
+
                 const hargaSatuan = item.harga || item.price || 0;
                 const qty = item.qty || 0;
                 const subTotal = item.subtotal || (hargaSatuan * qty);
@@ -159,23 +171,34 @@
             font-size: 0.75rem;
             border-top: none;
         }
+
         .table tbody tr:last-child td {
             border-bottom: none;
         }
+
         .shadow-xs {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
         .modal-content {
             border-radius: 1rem;
         }
+
         .bg-light {
             background-color: #f8f9fa !important;
         }
+
         .badge.bg-light.text-primary {
             background-color: #f0f4ff !important;
         }
+
         /* Memastikan posisi modal di depan backdrop */
-        .modal { z-index: 1060 !important; }
-        .modal-backdrop { z-index: 1050 !important; }
+        .modal {
+            z-index: 1060 !important;
+        }
+
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
     </style>
 @endsection

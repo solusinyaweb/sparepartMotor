@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\StockController;
@@ -13,9 +14,7 @@ Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('au
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::name('admin.')->prefix('admin')->middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('customers', CustomerController::class);
     Route::resource('products', ProductController::class);
