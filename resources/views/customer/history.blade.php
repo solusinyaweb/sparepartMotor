@@ -33,8 +33,8 @@
         }
 
         /* .modal-backdrop {
-                    z-index: 1050 !important;
-                } */
+                                        z-index: 1050 !important;
+                                    } */
 
         .modal-backdrop {
             backdrop-filter: none !important;
@@ -122,6 +122,11 @@
                                                     <span class="p-1 bg-info rounded-circle me-2"></span>
                                                     <span class="small fw-bold">Menunggu Konfirmasi</span>
                                                 </div>
+                                            @elseif ($order->status == 'rejected')
+                                                <div class="d-flex align-items-center text-danger">
+                                                    <span class="p-1 bg-danger rounded-circle me-2"></span>
+                                                    <span class="small fw-bold">Ditolak</span>
+                                                </div>
                                             @endif
                                         </td>
                                         <td class="text-center pe-4 py-3">
@@ -172,7 +177,19 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <span class="fw-bold text-muted">Status Pesanan:</span>
-                        <span id="detailStatus" class="ms-2"></span>
+                        <span id="detailStatus" class="ms-2"></span><br>
+                        <span class="fw-bold text-muted">Metode Pembayaran:</span>
+                        <span id="detailPaymentMethod"></span>
+
+                        <div id="cashInfo" class="d-none">
+                            <span class="fw-bold text-muted">Uang Cash:</span>
+                            <span id="detailCashAmount"></span>
+                            <span class="fw-bold text-muted">Kembalian:</span>
+                            <span id="detailChangeAmount"></span>
+                        </div>
+
+                        <div id="transferInfo" class="d-none"></div>
+
                     </div>
 
                     <div class="bg-light rounded-3 p-1">
@@ -204,11 +221,11 @@
             const order = dataOrders.find(o => o.id == id);
             if (!order) return;
 
-            // Invoice
+            // ================== INVOICE ==================
             const invoiceCode = order.invoice || ('INV-' + order.id);
             document.getElementById('orderKode').innerText = '#' + invoiceCode;
 
-            // ===== STATUS =====
+            // ================== STATUS ==================
             let statusHtml = '';
             switch (order.status) {
                 case 'approved':
@@ -227,9 +244,38 @@
                     statusHtml = `<span class="badge bg-secondary">Tidak Diketahui</span>`;
             }
             document.getElementById('detailStatus').innerHTML = statusHtml;
-            // ==================
 
-            // Items
+            // ================== METODE PEMBAYARAN (BARU) ==================
+            const paymentMethodEl = document.getElementById('detailPaymentMethod');
+            const cashInfoEl = document.getElementById('cashInfo');
+            const transferInfoEl = document.getElementById('transferInfo');
+
+            // reset
+            cashInfoEl.classList.add('d-none');
+            transferInfoEl.classList.add('d-none');
+
+            if (order.payment_method === 'cash') {
+                paymentMethodEl.innerHTML = `<span class="badge bg-success">Cash</span>`;
+
+                document.getElementById('detailCashAmount').innerText =
+                    'Rp ' + Number(order.cash_amount ?? 0).toLocaleString('id-ID');
+
+                document.getElementById('detailChangeAmount').innerText =
+                    'Rp ' + Number(order.change_amount ?? 0).toLocaleString('id-ID');
+
+                cashInfoEl.classList.remove('d-none');
+            }
+
+            if (order.payment_method === 'transfer') {
+                paymentMethodEl.innerHTML = `<span class="badge bg-primary">Transfer</span>`;
+                transferInfoEl.classList.remove('d-none');
+            }
+
+            if (!order.payment_method) {
+                paymentMethodEl.innerHTML = '-';
+            }
+
+            // ================== ITEMS ==================
             let html = '';
             const items = order.items || order.details || [];
 
@@ -240,26 +286,27 @@
                 const subTotal = item.subtotal || (hargaSatuan * qty);
 
                 html += `
-                <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
-                    <div style="max-width: 70%;">
-                        <div class="fw-bold text-dark mb-1">${namaBarang}</div>
-                        <span class="badge bg-white text-dark border">
-                            ${qty} pcs x Rp ${Number(hargaSatuan).toLocaleString('id-ID')}
-                        </span>
-                    </div>
-                    <span class="fw-bold text-dark">
-                        Rp ${Number(subTotal).toLocaleString('id-ID')}
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
+                <div style="max-width: 70%;">
+                    <div class="fw-bold text-dark mb-1">${namaBarang}</div>
+                    <span class="badge bg-white text-dark border">
+                        ${qty} pcs x Rp ${Number(hargaSatuan).toLocaleString('id-ID')}
                     </span>
-                </li>`;
+                </div>
+                <span class="fw-bold text-dark">
+                    Rp ${Number(subTotal).toLocaleString('id-ID')}
+                </span>
+            </li>`;
             });
 
             document.getElementById('detailList').innerHTML =
                 html || '<li class="list-group-item text-center py-3">Data barang tidak ditemukan</li>';
 
+            // ================== TOTAL ==================
             document.getElementById('detailTotal').innerText =
                 "Rp " + Number(order.total).toLocaleString('id-ID');
 
-            // Show modal (TANPA appendChild)
+            // ================== SHOW MODAL ==================
             const modalEl = document.getElementById('modalDetail');
             const myModal = new bootstrap.Modal(modalEl);
             myModal.show();
