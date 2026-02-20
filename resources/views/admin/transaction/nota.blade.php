@@ -10,7 +10,7 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>Pelanggan</th>
+                        <th>Nama Admin</th>
                         <th>Kode</th>
                         <th>Tanggal</th>
                         <th>Total</th>

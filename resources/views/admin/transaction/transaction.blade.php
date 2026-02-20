@@ -17,7 +17,7 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="fw-bold mb-0">Konfirmasi & Validasi Transaksi</h5>
+            <h5 class="fw-bold mb-0">Daftar Transaksi</h5>
             <div class="btn-group gap-2">
                 <a href="{{ route('admin.transaksi') }}" class="btn btn-outline-primary btn-sm {{ !request('status') ? 'active' : '' }}">Semua</a>
                 <a href="{{ route('admin.transaksi', ['status' => 'pending']) }}" class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
@@ -29,12 +29,12 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-3">Pelanggan</th>
+                            <th class="ps-3">Nama Admin</th>
                             <th>Detail</th>
                             <th>Total</th>
-                            <th>Bukti</th>
+                            {{-- <th>Bukti</th> --}}
                             <th>Status</th>
-                            <th>Aksi</th>
+                            {{-- <th>Aksi</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -50,7 +50,7 @@
                                 <td>
                                     <span class="fw-bold text-dark">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                                 </td>
-                                <td>
+                                {{-- <td>
                                     @if ($order->payment_proof)
                                         <button class="btn btn-sm btn-light border"
                                             onclick="viewImage('{{ asset('storage/payment_proof/' . $order->payment_proof) }}')">
@@ -59,17 +59,17 @@
                                     @else
                                         <span class="text-muted small">-</span>
                                     @endif
-                                </td>
+                                </td> --}}
                                 <td>
                                     @if (in_array($order->status, ['pending', 'paid']))
                                         <span class="badge bg-warning text-dark">Menunggu</span>
                                     @elseif($order->status == 'approved')
-                                        <span class="badge bg-success">Disetujui</span>
+                                        <span class="badge bg-success">Selesai</span>
                                     @else
                                         <span class="badge bg-danger">Ditolak</span>
                                     @endif
                                 </td>
-                                <td class="pe-3">
+                                {{-- <td class="pe-3">
                                     @if (in_array($order->status, ['pending', 'paid']))
                                         <div class="d-flex gap-2">
                                             <button class="btn btn-success btn-sm px-3 fw-bold" onclick="updateStatus({{ $order->id }}, 'approved')">Terima</button>
@@ -78,7 +78,7 @@
                                     @else
                                         <span class="badge bg-secondary">Selesai</span>
                                     @endif
-                                </td>
+                                </td> --}}
                             </tr>
                         @empty
                             <tr><td colspan="6" class="text-center py-5 text-muted">Tidak ada data transaksi.</td></tr>
