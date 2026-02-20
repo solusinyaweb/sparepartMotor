@@ -28,6 +28,13 @@
                 <span class="nxl-mtext">Stock Product</span>
             </a>
         </li>
+         <li class="nxl-item {{ Request::is('customer/catalog*') || Request::is('customer/cart*') ? 'active' : '' }}">
+            <a href="{{ route('customer.catalog') }}" class="nxl-link">
+                <span class="nxl-micon"><i class="feather-book-open"></i></span>
+                <span class="nxl-mtext">Catalog</span>
+            </a>
+        </li>
+        <li clas
         <li class="nxl-item {{ Request::is('admin/transaksi*') ? 'active' : '' }}">
             <a href="{{ route('admin.transaksi') }}" class="nxl-link">
                 <span class="nxl-micon"><i class="feather-shopping-cart"></i></span>
