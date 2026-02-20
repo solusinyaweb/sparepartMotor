@@ -40,24 +40,25 @@
                                         <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @foreach ($products as $product)
-                                        <tr>
-                                            <td class="fw-bold">{{ $product->code }}</td>
-                                            <td>{{ $product->name }}</td>
-                                            <td><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong></td>
-                                            {{-- <td>{{ $product->stocks->sum('quantity') }}</td> --}}
-                                            <td>{{ $product->total_stock }}</td>
-                                            <td class="text-center">
-                                                {{-- Mengirim ID dan Nama Produk ke JavaScript --}}
-                                                <button onclick="addToCart({{ $product->id }}, '{{ $product->name }}')"
-                                                    class="btn btn-primary btn-sm btn-tambah-keranjang px-3">
-                                                    + Keranjang
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
+                               <tbody>
+    @foreach ($products as $product)
+        {{-- Hanya menampilkan produk jika total_stock lebih besar dari 0 --}}
+        @if ($product->total_stock > 0)
+            <tr>
+                <td class="fw-bold">{{ $product->code }}</td>
+                <td>{{ $product->name }}</td>
+                <td><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong></td>
+                <td>{{ $product->total_stock }}</td>
+                <td class="text-center">
+                    <button onclick="addToCart({{ $product->id }}, '{{ $product->name }}')"
+                        class="btn btn-primary btn-sm btn-tambah-keranjang px-3">
+                        + Keranjang
+                    </button>
+                </td>
+            </tr>
+        @endif
+    @endforeach
+</tbody>
                             </table>
                         </div>
                     </div>
