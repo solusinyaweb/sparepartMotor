@@ -15,35 +15,9 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .modal-content {
-            border-radius: 1rem;
-        }
-
-        .bg-light {
-            background-color: #f8f9fa !important;
-        }
-
-        .badge.bg-light.text-primary {
-            background-color: #f0f4ff !important;
-        }
-
-        /* Memastikan posisi modal di depan backdrop */
+        /* ================= ANTI BLUR TOTAL ================= */
         .modal {
             z-index: 1060 !important;
-        }
-
-        /* .modal-backdrop {
-                                        z-index: 1050 !important;
-                                    } */
-
-        .modal-backdrop {
-            backdrop-filter: none !important;
-            background-color: rgba(0, 0, 0, .5) !important;
-        }
-
-
-        /* FIX MODAL BLUR TOTAL */
-        .modal {
             filter: none !important;
             backdrop-filter: none !important;
         }
@@ -52,10 +26,17 @@
             filter: none !important;
             backdrop-filter: none !important;
             opacity: 1 !important;
+            border-radius: 1rem;
         }
 
         body.modal-open {
             filter: none !important;
+        }
+
+        .modal-backdrop {
+            backdrop-filter: none !important;
+            background-color: rgba(0, 0, 0, .5) !important;
+            z-index: 1050 !important;
         }
     </style>
 
@@ -63,12 +44,7 @@
         <div class="col-lg-12">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3 border-bottom">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                            <i class="feather feather-shopping-bag text-primary"></i>
-                        </div>
-                        <h5 class="mb-0 fw-bold text-dark">Riwayat Pesanan Saya</h5>
-                    </div>
+                    <h5 class="mb-0 fw-bold">Riwayat Pesanan Saya</h5>
                 </div>
 
                 <div class="card-body p-0">
@@ -76,80 +52,58 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted"
-                                        style="letter-spacing: 0.5px;">Informasi Invoice</th>
-                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">
-                                        Total Pembayaran</th>
-                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="letter-spacing: 0.5px;">
-                                        Status Pesanan</th>
-                                    <th class="text-center pe-4 py-3 text-uppercase small fw-bold text-muted"
-                                        style="letter-spacing: 0.5px;">Opsi</th>
+                                    <th class="ps-4">Invoice</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th class="text-center pe-4">Opsi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($orders as $order)
                                     <tr>
-                                        <td class="ps-4 py-3">
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <div class="fw-bold text-dark mb-1">
-                                                        {{ $order->created_at->format('d M Y') }}</div>
-                                                    <span
-                                                        class="badge bg-light text-primary border border-primary border-opacity-25 fw-medium">
-                                                        #{{ $order->invoice ?? ($order->kode_transaksi ?? $order->id) }}
-                                                    </span>
-                                                </div>
+                                        <td class="ps-4">
+                                            <div class="fw-bold">{{ $order->created_at->format('d M Y') }}</div>
+                                            <span class="badge bg-light text-primary">
+                                                #{{ $order->invoice }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="fw-bold">
+                                                Rp {{ number_format($order->total, 0, ',', '.') }}
                                             </div>
+                                            <small class="text-muted">
+                                                Metode: {{ ucfirst($order->payment_method ?? '-') }}
+                                            </small>
                                         </td>
-                                        <td class="py-3">
-                                            <div class="text-dark fw-bold">Rp
-                                                {{ number_format($order->total, 0, ',', '.') }}</div>
-                                            <small class="text-muted">Metode: Transfer</small>
-                                        </td>
-                                        <td class="py-3">
+
+                                        <td>
                                             @if ($order->status == 'approved')
-                                                <div class="d-flex align-items-center text-success">
-                                                    <span class="p-1 bg-success rounded-circle me-2"></span>
-                                                    <span class="small fw-bold">Disetujui</span>
-                                                </div>
-                                            @elseif($order->status == 'pending')
-                                                <div class="d-flex align-items-center text-warning">
-                                                    <span class="p-1 bg-warning rounded-circle me-2"></span>
-                                                    <span class="small fw-bold">Pending</span>
-                                                </div>
+                                                <span class="badge bg-success">Disetujui</span>
                                             @elseif ($order->status == 'paid')
-                                                <div class="d-flex align-items-center text-info">
-                                                    <span class="p-1 bg-info rounded-circle me-2"></span>
-                                                    <span class="small fw-bold">Menunggu Konfirmasi</span>
-                                                </div>
+                                                <span class="badge bg-info">Menunggu Konfirmasi</span>
+                                            @elseif ($order->status == 'pending')
+                                                <span class="badge bg-warning text-dark">Pending</span>
                                             @elseif ($order->status == 'rejected')
-                                                <div class="d-flex align-items-center text-danger">
-                                                    <span class="p-1 bg-danger rounded-circle me-2"></span>
-                                                    <span class="small fw-bold">Ditolak</span>
-                                                </div>
+                                                <span class="badge bg-danger">Ditolak</span>
                                             @endif
                                         </td>
-                                        <td class="text-center pe-4 py-3">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button class="btn btn-outline-primary btn-sm px-3 rounded-2 shadow-xs"
-                                                    onclick="showDetail({{ $order->id }})">
-                                                    <i class="feather feather-eye me-1"></i> Detail
-                                                </button>
-                                                <a href="{{ route('customer.nota.show', $order->id) }}" target="_blank"
-                                                    class="btn btn-warning btn-sm text-white px-3 rounded-2 shadow-xs">
-                                                    <i class="feather feather-printer me-1"></i> Cetak
-                                                </a>
-                                            </div>
+
+                                        <td class="text-center pe-4">
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                onclick="showDetail({{ $order->id }})">
+                                                Detail
+                                            </button>
+                                            <a href="{{ route('customer.nota.show', $order->id) }}" target="_blank"
+                                                class="btn btn-warning btn-sm text-white">
+                                                Cetak
+                                            </a>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-5">
-                                            <div class="py-4">
-                                                <i
-                                                    class="feather feather-inbox fs-1 text-muted opacity-25 mb-3 d-block"></i>
-                                                <p class="text-muted mb-0">Belum ada riwayat invoice ditemukan.</p>
-                                            </div>
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            Belum ada riwayat transaksi
                                         </td>
                                     </tr>
                                 @endforelse
@@ -161,44 +115,46 @@
         </div>
     </div>
 
-    {{-- MODAL DETAIL --}}
-    <div class="modal fade" id="modalDetail" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
-        data-bs-focus="false">
-
+    {{-- ================= MODAL DETAIL ================= --}}
+    <div class="modal fade" id="modalDetail" tabindex="-1" data-bs-backdrop="static" data-bs-focus="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow border-0">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark">
-                        Detail Invoice <span id="orderKode" class="text-primary opacity-75"></span>
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">
+                        Detail Invoice <span id="orderKode" class="text-primary"></span>
                     </h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
+                    <div class="mb-2">
+                        <strong>Status:</strong>
+                        <span id="detailStatus"></span>
+                    </div>
+
                     <div class="mb-3">
-                        <span class="fw-bold text-muted">Status Pesanan:</span>
-                        <span id="detailStatus" class="ms-2"></span><br>
-                        <span class="fw-bold text-muted">Metode Pembayaran:</span>
+                        <strong>Metode Pembayaran:</strong>
                         <span id="detailPaymentMethod"></span>
+                    </div>
 
-                        <div id="cashInfo" class="d-none">
-                            <span class="fw-bold text-muted">Uang Cash:</span>
-                            <span id="detailCashAmount"></span>
-                            <span class="fw-bold text-muted">Kembalian:</span>
-                            <span id="detailChangeAmount"></span>
+                    {{-- CASH ONLY --}}
+                    <div id="cashInfo" class="mb-3 d-none">
+                        <div>Uang Cash:
+                            <strong id="detailCashAmount"></strong>
                         </div>
-
-                        <div id="transferInfo" class="d-none"></div>
-
+                        <div>Kembalian:
+                            <strong id="detailChangeAmount"></strong>
+                        </div>
                     </div>
 
-                    <div class="bg-light rounded-3 p-1">
-                        <ul class="list-group list-group-flush rounded-3" id="detailList"></ul>
-                    </div>
+                    <hr>
+
+                    <ul class="list-group list-group-flush" id="detailList"></ul>
                 </div>
-                <div class="modal-footer border-0 bg-light rounded-bottom-4 d-flex justify-content-between py-3">
-                    <span class="fw-bold text-muted">Total Tagihan</span>
-                    <span class="h5 mb-0 fw-bold text-primary" id="detailTotal"></span>
+
+                <div class="modal-footer bg-light">
+                    <span class="fw-bold">Total</span>
+                    <span class="fw-bold text-primary" id="detailTotal"></span>
                 </div>
             </div>
         </div>
@@ -213,7 +169,6 @@
         });
     </script>
 
-
     <script>
         const dataOrders = @json($orders);
 
@@ -221,95 +176,59 @@
             const order = dataOrders.find(o => o.id == id);
             if (!order) return;
 
-            // ================== INVOICE ==================
-            const invoiceCode = order.invoice || ('INV-' + order.id);
-            document.getElementById('orderKode').innerText = '#' + invoiceCode;
+            // INVOICE
+            document.getElementById('orderKode').innerText = '#' + order.invoice;
 
-            // ================== STATUS ==================
-            let statusHtml = '';
-            switch (order.status) {
-                case 'approved':
-                    statusHtml = `<span class="badge bg-success">Disetujui</span>`;
-                    break;
-                case 'pending':
-                    statusHtml = `<span class="badge bg-warning text-dark">Pending</span>`;
-                    break;
-                case 'paid':
-                    statusHtml = `<span class="badge bg-info">Menunggu Konfirmasi</span>`;
-                    break;
-                case 'rejected':
-                    statusHtml = `<span class="badge bg-danger">Ditolak</span>`;
-                    break;
-                default:
-                    statusHtml = `<span class="badge bg-secondary">Tidak Diketahui</span>`;
-            }
-            document.getElementById('detailStatus').innerHTML = statusHtml;
+            // STATUS
+            const statusMap = {
+                approved: '<span class="badge bg-success">Disetujui</span>',
+                paid: '<span class="badge bg-info">Menunggu Konfirmasi</span>',
+                pending: '<span class="badge bg-warning text-dark">Pending</span>',
+                rejected: '<span class="badge bg-danger">Ditolak</span>',
+            };
+            document.getElementById('detailStatus').innerHTML =
+                statusMap[order.status] ?? '-';
 
-            // ================== METODE PEMBAYARAN (BARU) ==================
-            const paymentMethodEl = document.getElementById('detailPaymentMethod');
-            const cashInfoEl = document.getElementById('cashInfo');
-            const transferInfoEl = document.getElementById('transferInfo');
+            // PAYMENT METHOD
+            const paymentEl = document.getElementById('detailPaymentMethod');
+            const cashInfo = document.getElementById('cashInfo');
 
-            // reset
-            cashInfoEl.classList.add('d-none');
-            transferInfoEl.classList.add('d-none');
+            cashInfo.classList.add('d-none');
 
             if (order.payment_method === 'cash') {
-                paymentMethodEl.innerHTML = `<span class="badge bg-success">Cash</span>`;
+                paymentEl.innerHTML = '<span class="badge bg-success">Cash</span>';
 
                 document.getElementById('detailCashAmount').innerText =
-                    'Rp ' + Number(order.cash_amount ?? 0).toLocaleString('id-ID');
+                    'Rp ' + Number(order.cash_amount).toLocaleString('id-ID');
 
                 document.getElementById('detailChangeAmount').innerText =
-                    'Rp ' + Number(order.change_amount ?? 0).toLocaleString('id-ID');
+                    'Rp ' + Number(order.change_amount).toLocaleString('id-ID');
 
-                cashInfoEl.classList.remove('d-none');
+                cashInfo.classList.remove('d-none');
+            } else {
+                paymentEl.innerHTML = '<span class="badge bg-primary">Transfer</span>';
             }
 
-            if (order.payment_method === 'transfer') {
-                paymentMethodEl.innerHTML = `<span class="badge bg-primary">Transfer</span>`;
-                transferInfoEl.classList.remove('d-none');
-            }
-
-            if (!order.payment_method) {
-                paymentMethodEl.innerHTML = '-';
-            }
-
-            // ================== ITEMS ==================
+            // ITEMS
             let html = '';
-            const items = order.items || order.details || [];
-
-            items.forEach(item => {
-                const namaBarang = item.product ? item.product.name : 'Produk tidak dikenal';
-                const hargaSatuan = item.harga || item.price || 0;
-                const qty = item.qty || 0;
-                const subTotal = item.subtotal || (hargaSatuan * qty);
-
+            (order.items || []).forEach(item => {
+                const subtotal = item.qty * item.price;
                 html += `
-            <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
-                <div style="max-width: 70%;">
-                    <div class="fw-bold text-dark mb-1">${namaBarang}</div>
-                    <span class="badge bg-white text-dark border">
-                        ${qty} pcs x Rp ${Number(hargaSatuan).toLocaleString('id-ID')}
-                    </span>
-                </div>
-                <span class="fw-bold text-dark">
-                    Rp ${Number(subTotal).toLocaleString('id-ID')}
-                </span>
-            </li>`;
+                <li class="list-group-item d-flex justify-content-between">
+                    <div>
+                        <strong>${item.product?.name ?? '-'}</strong><br>
+                        <small>${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small>
+                    </div>
+                    <strong>Rp ${subtotal.toLocaleString('id-ID')}</strong>
+                </li>
+            `;
             });
+            document.getElementById('detailList').innerHTML = html;
 
-            document.getElementById('detailList').innerHTML =
-                html || '<li class="list-group-item text-center py-3">Data barang tidak ditemukan</li>';
-
-            // ================== TOTAL ==================
             document.getElementById('detailTotal').innerText =
-                "Rp " + Number(order.total).toLocaleString('id-ID');
+                'Rp ' + Number(order.total).toLocaleString('id-ID');
 
-            // ================== SHOW MODAL ==================
-            const modalEl = document.getElementById('modalDetail');
-            const myModal = new bootstrap.Modal(modalEl);
-            myModal.show();
+            new bootstrap.Modal(document.getElementById('modalDetail')).show();
         }
     </script>
 @endsection

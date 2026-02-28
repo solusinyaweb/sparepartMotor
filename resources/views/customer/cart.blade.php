@@ -160,6 +160,7 @@
                         <span id="change_display" class="h6 mb-0 fw-bold text-success">Rp 0</span>
                     </div>
                 </div>
+            </div>
 
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" id="btn_submit" class="btn btn-primary btn-lg shadow-sm"
