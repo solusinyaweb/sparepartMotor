@@ -91,8 +91,18 @@
 
     {{-- LAPORAN HARIAN --}}
     <div class="card mt-4 border-0 shadow-sm mb-5">
-        <div class="card-header bg-white">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold">Laporan Ringkasan Penjualan</h5>
+
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.report.export.daily') }}" target="_blank" class="btn btn-sm btn-danger">
+                    <i class="bi bi-file-earmark-pdf"></i> Export Harian
+                </a>
+
+                <a href="{{ route('admin.report.export.monthly') }}" target="_blank" class="btn btn-sm btn-success">
+                    <i class="bi bi-file-earmark-pdf"></i> Export Bulanan
+                </a>
+            </div>
         </div>
         <div class="card-body p-0">
             <table class="table mb-0">
