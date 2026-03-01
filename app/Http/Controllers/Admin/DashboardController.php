@@ -75,24 +75,27 @@ class DashboardController extends Controller
         ));
     }
 
-    // =========================
-    // EXPORT HARIAN
-    // =========================
-    public function exportDaily()
+    public function export(Request $request)
     {
-        $today = Carbon::today();
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date'
+        ]);
 
-        $orders = Order::whereDate('created_at', $today)
+        $start = Carbon::parse($request->start_date)->startOfDay();
+        $end   = Carbon::parse($request->end_date)->endOfDay();
+
+        $orders = Order::whereBetween('created_at', [$start, $end])
             ->where('status', 'approved')
             ->get();
 
         $totalRevenue = $orders->sum('total');
-        $totalOrders = $orders->count();
+        $totalOrders  = $orders->count();
 
         $items = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->whereDate('orders.created_at', $today)
+            ->whereBetween('orders.created_at', [$start, $end])
             ->where('orders.status', 'approved')
             ->select(
                 'products.name',
@@ -100,55 +103,19 @@ class DashboardController extends Controller
                 DB::raw('SUM(order_items.qty * order_items.price) as total_revenue')
             )
             ->groupBy('products.name')
+            ->orderByDesc('total_qty')
             ->get();
 
-        $pdf = Pdf::loadview('admin.reports.daily_pdf', compact(
-            'today',
+        $pdf = Pdf::loadview('admin.reports.range_pdf', compact(
+            'start',
+            'end',
             'totalRevenue',
             'totalOrders',
             'items'
         ))->setPaper('a4', 'portrait');
 
-        return $pdf->stream('Laporan-Harian-' . $today->format('d-m-Y') . '.pdf');
-    }
-
-
-    // =========================
-    // EXPORT BULANAN
-    // =========================
-    public function exportMonthly()
-    {
-        $now = Carbon::now();
-
-        $orders = Order::whereMonth('created_at', $now->month)
-            ->whereYear('created_at', $now->year)
-            ->where('status', 'approved')
-            ->get();
-
-        $totalRevenue = $orders->sum('total');
-        $totalOrders = $orders->count();
-
-        $items = DB::table('order_items')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->whereMonth('orders.created_at', $now->month)
-            ->whereYear('orders.created_at', $now->year)
-            ->where('orders.status', 'approved')
-            ->select(
-                'products.name',
-                DB::raw('SUM(order_items.qty) as total_qty'),
-                DB::raw('SUM(order_items.qty * order_items.price) as total_revenue')
-            )
-            ->groupBy('products.name')
-            ->get();
-
-        $pdf = Pdf::loadview('admin.reports.monthly_pdf', compact(
-            'now',
-            'totalRevenue',
-            'totalOrders',
-            'items'
-        ))->setPaper('a4', 'portrait');
-
-        return $pdf->stream('Laporan-Bulanan-' . $now->format('m-Y') . '.pdf');
+        return $pdf->stream(
+            'Laporan-' . $start->format('d-m-Y') . '-sd-' . $end->format('d-m-Y') . '.pdf'
+        );
     }
 }

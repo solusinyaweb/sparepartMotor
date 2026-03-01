@@ -15,8 +15,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::name('admin.')->prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/report/export/daily', [DashboardController::class, 'exportDaily'])->name('report.export.daily');
-    Route::get('/report/export/monthly', [DashboardController::class, 'exportMonthly'])->name('report.export.monthly');
+    Route::get('/report/export',[DashboardController::class, 'export'])->name('report.export');
 
     Route::resource('customers', CustomerController::class);
     Route::resource('products', ProductController::class);
