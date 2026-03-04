@@ -22,6 +22,12 @@
                 <span class="nxl-mtext">Product</span>
             </a>
         </li>
+        <li class="nxl-item ">
+            <a href="/category" class="nxl-link">
+                <span class="nxl-micon"><i class="feather-layout"></i></span>
+                <span class="nxl-mtext">Category</span>
+            </a>
+        </li>
         <li class="nxl-item {{ Request::is('admin/stock*') ? 'active' : '' }}">
             <a href="{{ route('admin.stock.index') }}" class="nxl-link">
                 <span class="nxl-micon"><i class="feather-database"></i></span>

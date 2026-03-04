@@ -11,6 +11,9 @@
                         <h5 class="mb-0">Ubah Data Stok Sparepart</h5>
                         <p class="text-muted small mb-0">Silahkan lengkapi detail informasi sparepart di bawah ini.</p>
                     </div>
+                    <a href="/add-category" class="btn btn-sm btn-success">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah Kategori
+                    </a>
                 </div>
 
                 <form action="{{ route('admin.products.update', $product->id) }}" method="POST">

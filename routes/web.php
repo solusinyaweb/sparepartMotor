@@ -9,6 +9,16 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CatalogController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/category', function () {
+    return view('admin.category.category');
+});
+Route::get('/add-category', function () {
+    return view('admin.category.add-category');
+});
+Route::get('/edit-category', function () {
+    return view('admin.category.edit-category');
+});
+
 Route::get('/', [LoginController::class, 'login'])->name('login');
 Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('authenticate');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -30,6 +40,7 @@ Route::name('admin.')->prefix('admin')->middleware('auth')->group(function () {
     Route::get('/nota', [OrderController::class, 'notaList'])->name('nota');
     Route::get('/nota/{id}', [OrderController::class, 'notaDetail'])->name('nota.print');
 });
+
 
 
 // customer root
