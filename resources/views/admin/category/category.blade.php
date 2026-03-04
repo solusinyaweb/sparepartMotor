@@ -16,15 +16,6 @@
                     </a>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" placeholder="Cari kategori...">
-                        </div>
-                    </div>
-                </div>
-
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">

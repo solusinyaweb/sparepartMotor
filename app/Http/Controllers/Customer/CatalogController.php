@@ -380,7 +380,7 @@ class CatalogController extends Controller
             $paymentProof = $filename;
 
             // Transfer menunggu konfirmasi admin
-            $status = 'pending';
+            $status = 'approved';
         }
 
         // ================= CASH =================

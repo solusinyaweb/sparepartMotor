@@ -20,7 +20,7 @@
             <h5 class="fw-bold mb-0">Daftar Transaksi</h5>
             <div class="btn-group gap-2">
                 <a href="{{ route('admin.transaksi') }}" class="btn btn-outline-primary btn-sm {{ !request('status') ? 'active' : '' }}">Semua</a>
-                <a href="{{ route('admin.transaksi', ['status' => 'pending']) }}" class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
+                {{-- <a href="{{ route('admin.transaksi', ['status' => 'pending']) }}" class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a> --}}
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                             <th class="ps-3">Nama Admin</th>
                             <th>Detail</th>
                             <th>Total</th>
-                            {{-- <th>Bukti</th> --}}
+                            <th>Bukti</th>
                             <th>Status</th>
                             {{-- <th>Aksi</th> --}}
                         </tr>
@@ -50,7 +50,7 @@
                                 <td>
                                     <span class="fw-bold text-dark">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                                 </td>
-                                {{-- <td>
+                                <td>
                                     @if ($order->payment_proof)
                                         <button class="btn btn-sm btn-light border"
                                             onclick="viewImage('{{ asset('storage/payment_proof/' . $order->payment_proof) }}')">
@@ -59,7 +59,7 @@
                                     @else
                                         <span class="text-muted small">-</span>
                                     @endif
-                                </td> --}}
+                                </td>
                                 <td>
                                     @if (in_array($order->status, ['pending', 'paid']))
                                         <span class="badge bg-warning text-dark">Menunggu</span>
