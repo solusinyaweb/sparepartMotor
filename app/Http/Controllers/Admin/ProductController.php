@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,8 @@ class ProductController extends Controller
     // ===============================
     public function index()
     {
-        $products = Product::latest()->get();
+        $products = Product::with('categoryRelation')->latest()->get();
+
         return view('admin.product.product', compact('products'));
     }
 
@@ -22,7 +24,9 @@ class ProductController extends Controller
     // ===============================
     public function create()
     {
-        return view('admin.product.add-product');
+        $categories = Category::get();
+
+        return view('admin.product.add-product', compact('categories'));
     }
 
     // ===============================
@@ -30,18 +34,29 @@ class ProductController extends Controller
     // ===============================
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'code'     => 'required|string|max:255|unique:products,code',
             'name'     => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'category' => 'nullable',
+            'category_id' => 'required|integer|exists:categories,id',
             'price'    => 'required|numeric|min:0',
         ]);
 
-        Product::create($request->all());
+        $category = Category::where('id', $request->category_id)->first();
+
+        $validated['category'] = $category->name;
+
+        try {
+            Product::create($validated);
+
 
         return redirect()
             ->route('admin.products.index')
             ->with('success', 'Produk berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
     }
 
     // ===============================

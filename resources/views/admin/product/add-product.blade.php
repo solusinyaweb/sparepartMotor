@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="row">
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-close-circle me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="col-lg-12">
         <div class="card stretch stretch-full">
             <div class="card-body">
@@ -11,7 +18,7 @@
                         <h5 class="mb-0">Tambah Data Stok Sparepart</h5>
                         <p class="text-muted small mb-0">Silahkan lengkapi detail informasi sparepart di bawah ini.</p>
                     </div>
-                    <a href="/add-category" class="btn btn-sm btn-success">
+                    <a href="{{ route('admin.categories.create') }}" class="btn btn-sm btn-success">
                         <i class="bi bi-plus-lg me-1"></i> Tambah Kategori
                     </a>
                 </div>
@@ -25,13 +32,22 @@
                             <input type="text" name="code" class="form-control"
                                 value="{{ old('code') }}"
                                 placeholder="Contoh: BRK-001">
+                            @error('code')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Kategori</label>
-                            <input type="text" name="category" class="form-control"
-                                value="{{ old('category') }}"
-                                placeholder="Masukkan kategori">
+                            <select name="category_id" id="category_id" class="form-select">
+                                <option value="" selected disabled hidden>-- Pilih Kategori --</option>
+                                @foreach ($categories as $item)
+                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
 
@@ -40,6 +56,9 @@
                         <input type="text" name="name" class="form-control"
                             value="{{ old('name') }}"
                             placeholder="Masukkan nama sparepart">
+                        @error('name')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="row">
@@ -51,6 +70,9 @@
                                     value="{{ old('price') }}"
                                     placeholder="0">
                             </div>
+                            @error('price')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
 

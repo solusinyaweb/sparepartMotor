@@ -16,8 +16,9 @@
                     </button> --}}
                 </div>
 
-                <form action="#" method="POST">
+                <form action="{{ route('admin.categories.update', $category->id) }}" method="POST">
                     @csrf
+                    @method('PUT')
 
                     {{-- <div class="row">
                         <div class="col-md-6 mb-3">
@@ -41,7 +42,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-dark">Nama Kategori</label>
                         <input type="text" name="name" class="form-control"
-                            value="{{ old('name') }}"
+                            value="{{ old('name', $category->name) }}"
                             placeholder="Contoh: Mesin (Engine)">
                     </div>
 
@@ -60,7 +61,7 @@
                     <hr class="my-4 border-dashed">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="#" class="btn btn-light px-4">Batal</a>
+                        <a href="{{ route('admin.categories.index') }}" class="btn btn-light px-4">Batal</a>
                         <button type="submit" class="btn btn-sm btn-primary px-4">
                             <i class="bi bi-save me-1"></i> Simpan Data Kategori
                         </button>

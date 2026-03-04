@@ -10,6 +10,16 @@
             </div>
         @endif
 
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="mdi mdi-check-all me-2"></i>
@@ -117,142 +127,206 @@
 
 
             {{-- ================= RIGHT : CHECKOUT ================= --}}
-           <div class="col-lg-4">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">Ringkasan Transaksi</h5>
-        </div>
+            {{-- <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">Ringkasan Transaksi</h5>
+                    </div>
 
-        <div class="card-body">
-            <div class="d-flex justify-content-between mb-2">
-                <span>Total Belanja</span>
-                <span class="fw-bold text-dark">
-                    Rp {{ number_format($total, 0, ',', '.') }}
-                </span>
-            </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Belanja</span>
+                            <span class="fw-bold text-dark">
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                            </span>
+                        </div>
 
-            <hr>
+                        <hr>
 
-            <div class="d-flex justify-content-between mb-4">
-                <span class="h5 fw-bold">Grand Total</span>
-                <span class="h5 fw-bold text-primary">
-                    Rp {{ number_format($total, 0, ',', '.') }}
-                </span>
-            </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="h5 fw-bold">Grand Total</span>
+                            <span class="h5 fw-bold text-primary">
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                            </span>
+                        </div>
 
-            <form action="{{ route('customer.checkout') }}" method="POST" enctype="multipart/form-data" id="checkoutForm">
-                @csrf
+                        <form action="{{ route('customer.checkout') }}" method="POST" enctype="multipart/form-data"
+                            id="checkoutForm">
+                            @csrf
 
-                <input type="hidden" name="payment_method" value="cash">
+                            <input type="hidden" name="payment_method" value="cash">
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted">Nominal Uang Bayar (Cash)</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" id="cash_amount" name="cash_amount" class="form-control"
-                            placeholder="Contoh: 50000" oninput="calculateChange()" required>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">Nominal Uang Bayar (Cash)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" id="cash_amount" name="cash_amount" class="form-control"
+                                        placeholder="Contoh: 50000" oninput="calculateChange()" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 p-3 bg-light border rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold">Kembalian:</span>
+                                    <span id="change_display" class="h6 mb-0 fw-bold text-success">Rp 0</span>
+                                </div>
+                            </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" id="btn_submit" class="btn btn-primary btn-lg shadow-sm"
+                            {{ $total == 0 ? 'disabled' : '' }}>
+                            Proses Pembayaran
+                        </button>
+
+                        <a href="{{ route('customer.cart') }}"
+                            class="btn btn-link btn-sm text-decoration-none text-muted mt-1">
+                            Kembali ke Keranjang
+                        </a>
+                    </div>
+                    </form>
+                </div>
+            </div> --}}
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">Ringkasan Transaksi</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Belanja</span>
+                            <span class="fw-bold">
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="h5 fw-bold">Grand Total</span>
+                            <span class="h5 fw-bold text-primary">
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <form action="{{ route('customer.checkout') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+
+                            {{-- ================= METODE PEMBAYARAN ================= --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Metode Pembayaran</label>
+                                <select name="payment_method" id="payment_method" class="form-select"
+                                    onchange="handlePaymentChange()" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="transfer">Transfer Bank</option>
+                                </select>
+                            </div>
+
+                            {{-- ================= CASH SECTION ================= --}}
+                            <div id="cash_section">
+                                <div class="mb-3">
+                                    <label class="form-label small">Nominal Uang Bayar</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" id="cash_amount" name="cash_amount" class="form-control"
+                                            oninput="calculateChange()">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 p-3 bg-light border rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="small fw-bold">Kembalian:</span>
+                                        <span id="change_display" class="fw-bold text-success">Rp 0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ================= TRANSFER SECTION ================= --}}
+                            <div id="transfer_section" style="display:none;">
+                                <div class="mb-3">
+                                    <label class="form-label small">
+                                        Upload Bukti Transfer
+                                    </label>
+                                    <input type="file" name="payment_proof" id="payment_proof" class="form-control">
+                                    <small class="text-muted">
+                                        Format: JPG/PNG, Max 2MB
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" id="btn_submit" class="btn btn-primary btn-lg"
+                                    {{ $total == 0 ? 'disabled' : '' }}>
+                                    Proses Pembayaran
+                                </button>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
-
-                <div class="mb-3 p-3 bg-light border rounded">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="small fw-bold">Kembalian:</span>
-                        <span id="change_display" class="h6 mb-0 fw-bold text-success">Rp 0</span>
-                    </div>
-                </div>
             </div>
-
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" id="btn_submit" class="btn btn-primary btn-lg shadow-sm"
-                        {{ $total == 0 ? 'disabled' : '' }}>
-                        Proses Pembayaran
-                    </button>
-
-                    <a href="{{ route('customer.cart') }}"
-                        class="btn btn-link btn-sm text-decoration-none text-muted mt-1">
-                        Kembali ke Keranjang
-                    </a>
-                </div>
-            </form>
         </div>
-    </div>
-</div>
 
-<script>
-    function calculateChange() {
-        const total = {{ $total }};
-        const cashAmount = document.getElementById('cash_amount').value;
-        const changeDisplay = document.getElementById('change_display');
-        const btnSubmit = document.getElementById('btn_submit');
+        <script>
+            function calculateChange() {
+                const total = {{ $total }};
+                const cashAmount = document.getElementById('cash_amount').value;
+                const changeDisplay = document.getElementById('change_display');
+                const btnSubmit = document.getElementById('btn_submit');
 
-        if (cashAmount >= total) {
-            const change = cashAmount - total;
-            changeDisplay.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(change);
-            btnSubmit.disabled = false;
-        } else {
-            changeDisplay.innerText = 'Rp 0';
-            // Opsional: disable tombol jika uang tidak cukup
-            // btnSubmit.disabled = true;
-        }
-    }
-</script>
-
-            <script>
-                // Ambil nilai total dari PHP ke JS
-                const totalBelanja = {{ $total }};
-
-                function handlePaymentChange() {
-                    const method = document.getElementById('payment_method').value;
-                    const transferSection = document.getElementById('transfer_section');
-                    const cashSection = document.getElementById('cash_section');
-                    const proofInput = document.getElementById('payment_proof');
-                    const cashInput = document.getElementById('cash_amount');
-                    const btnSubmit = document.getElementById('btn_submit');
-
-                    // Toggle Tampilan
-                    if (method === 'transfer') {
-                        transferSection.style.display = 'block';
-                        cashSection.style.display = 'none';
-                        // Set Atribut Required
-                        proofInput.required = true;
-                        cashInput.required = false;
-                        btnSubmit.disabled = false;
-                    } else if (method === 'cash') {
-                        transferSection.style.display = 'none';
-                        cashSection.style.display = 'block';
-                        // Set Atribut Required
-                        proofInput.required = false;
-                        cashInput.required = true;
-                        calculateChange(); // Validasi ulang tombol
-                    }
+                if (cashAmount >= total) {
+                    const change = cashAmount - total;
+                    changeDisplay.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(change);
+                    btnSubmit.disabled = false;
+                } else {
+                    changeDisplay.innerText = 'Rp 0';
+                    // Opsional: disable tombol jika uang tidak cukup
+                    // btnSubmit.disabled = true;
                 }
+            }
+        </script>
 
-                function calculateChange() {
-                    const cashValue = parseFloat(document.getElementById('cash_amount').value) || 0;
-                    const changeDisplay = document.getElementById('change_display');
-                    const btnSubmit = document.getElementById('btn_submit');
+        <script>
+            const totalBelanja = {{ $total }};
 
-                    const selisih = cashValue - totalBelanja;
+            function handlePaymentChange() {
+                const method = document.getElementById('payment_method').value;
+                const cashSection = document.getElementById('cash_section');
+                const transferSection = document.getElementById('transfer_section');
+                const btnSubmit = document.getElementById('btn_submit');
 
-                    if (cashValue === 0) {
-                        changeDisplay.innerText = "Rp 0";
-                        changeDisplay.className = "h6 mb-0 fw-bold text-dark";
-                        btnSubmit.disabled = true;
-                    } else if (selisih >= 0) {
-                        // Jika uang cukup atau pas
-                        changeDisplay.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(selisih);
-                        changeDisplay.className = "h6 mb-0 fw-bold text-success";
-                        btnSubmit.disabled = false;
-                    } else {
-                        // Jika uang kurang
-                        changeDisplay.innerText = "Uang Kurang!";
-                        changeDisplay.className = "h6 mb-0 fw-bold text-danger";
-                        btnSubmit.disabled = true;
-                    }
+                if (method === 'cash') {
+                    cashSection.style.display = 'block';
+                    transferSection.style.display = 'none';
+                    btnSubmit.disabled = true;
+                } else {
+                    cashSection.style.display = 'none';
+                    transferSection.style.display = 'block';
+                    btnSubmit.disabled = false;
                 }
-            </script>
+            }
 
-        </div>
+            function calculateChange() {
+                const cash = parseFloat(document.getElementById('cash_amount').value) || 0;
+                const changeDisplay = document.getElementById('change_display');
+                const btnSubmit = document.getElementById('btn_submit');
+
+                const selisih = cash - totalBelanja;
+
+                if (selisih >= 0) {
+                    changeDisplay.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(selisih);
+                    btnSubmit.disabled = false;
+                } else {
+                    changeDisplay.innerText = "Uang Kurang!";
+                    changeDisplay.className = "fw-bold text-danger";
+                    btnSubmit.disabled = true;
+                }
+            }
+        </script>
+
     </div>
 
     {{-- SCRIPT AGAR TOMBOL PLUS MINUS BEKERJA --}}

@@ -11,7 +11,7 @@
                         <h5 class="mb-0">Daftar Kategori Produk</h5>
                         <p class="text-muted small mb-0">Kelola kategori untuk pengelompokan sparepart Anda.</p>
                     </div>
-                    <a href="/add-category" class="btn btn-sm btn-primary">
+                    <a href="{{ route('admin.categories.create') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-lg me-1"></i> Tambah Kategori Baru
                     </a>
                 </div>
@@ -37,14 +37,15 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse ($categories as $item)
                             <tr>
-                                <td>1</td>
-                                <td><span class="fw-bold">Mesin (Engine)</span></td>
+                                <td>{{ $loop->iteration }}</td>
+                                <td><span class="fw-bold">{{ $item->name }}</span></td>
                                 {{-- <td><span class="badge bg-soft-primary text-primary">ENG</span></td> --}}
-                                <td>24 Item</td>
+                                <td>{{ $item->products->count() }} Item</td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a href="edit-category" class="btn btn-sm btn-light-brand" title="Edit">
+                                        <a href="{{ route('admin.categories.edit', $item->id) }}" class="btn btn-sm btn-light-brand" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button class="btn btn-sm btn-light-danger" title="Hapus">
@@ -53,7 +54,11 @@
                                     </div>
                                 </td>
                             </tr>
-
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">Tidak ada data kategori.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

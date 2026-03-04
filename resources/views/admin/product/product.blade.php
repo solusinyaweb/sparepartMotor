@@ -51,7 +51,13 @@
                                                     <td class="fw-bold">{{ $product->name }}</td>
                                                     <td>
                                                         <span class="text-muted">
-                                                            {{ $product->category }}
+                                                            @if ($product->categoryRelation)
+                                                                {{ $product->categoryRelation->name }}
+                                                            @else
+                                                                <span class="badge bg-soft-danger text-danger">
+                                                                    Tidak ada kategori
+                                                                </span>
+                                                            @endif
                                                         </span>
                                                     </td>
                                                     <td>

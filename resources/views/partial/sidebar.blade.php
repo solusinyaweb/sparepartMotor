@@ -22,8 +22,8 @@
                 <span class="nxl-mtext">Product</span>
             </a>
         </li>
-        <li class="nxl-item ">
-            <a href="/category" class="nxl-link">
+        <li class="nxl-item {{ Request::is('admin/categories*') ? 'active' : '' }} ">
+            <a href="{{ route('admin.categories.index') }}" class="nxl-link">
                 <span class="nxl-micon"><i class="feather-layout"></i></span>
                 <span class="nxl-mtext">Category</span>
             </a>

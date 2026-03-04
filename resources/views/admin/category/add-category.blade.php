@@ -16,7 +16,7 @@
                     </button> --}}
                 </div>
 
-                <form action="#" method="POST">
+                <form action="{{ route('admin.categories.store') }}" method="POST">
                     @csrf
 
                     {{-- <div class="row">
@@ -60,7 +60,7 @@
                     <hr class="my-4 border-dashed">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="#" class="btn btn-light px-4">Batal</a>
+                        <a href="{{ route('admin.categories.index') }}" class="btn btn-light px-4">Batal</a>
                         <button type="submit" class="btn btn-sm btn-primary px-4">
                             <i class="bi bi-save me-1"></i> Simpan Data Kategori
                         </button>

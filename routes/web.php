@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
@@ -8,16 +9,6 @@ use App\Http\Controllers\Admin\StockController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CatalogController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/category', function () {
-    return view('admin.category.category');
-});
-Route::get('/add-category', function () {
-    return view('admin.category.add-category');
-});
-Route::get('/edit-category', function () {
-    return view('admin.category.edit-category');
-});
 
 Route::get('/', [LoginController::class, 'login'])->name('login');
 Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('authenticate');
@@ -28,6 +19,7 @@ Route::name('admin.')->prefix('admin')->middleware('auth')->group(function () {
     Route::get('/report/export',[DashboardController::class, 'export'])->name('report.export');
 
     Route::resource('customers', CustomerController::class);
+    Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
 
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');

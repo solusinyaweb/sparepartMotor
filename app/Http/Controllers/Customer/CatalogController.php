@@ -176,143 +176,267 @@ class CatalogController extends Controller
     //     }
     // }
 
+    // public function checkout(Request $request)
+    // {
+    //     // ==============================
+    //     // 1️⃣ VALIDASI DINAMIS
+    //     // ==============================
+    //     $request->validate([
+    //         'payment_method' => 'required|in:cash,transfer',
+
+    //         // Transfer
+    //         'payment_proof' => 'required_if:payment_method,transfer|image|max:2048',
+
+    //         // Cash
+    //         'cash_amount' => 'required_if:payment_method,cash|numeric|min:0',
+    //     ]);
+
+    //     $cart = session()->get('cart');
+
+    //     if (!$cart || count($cart) == 0) {
+    //         return back()->with('error', 'Keranjang kosong');
+    //     }
+
+    //     DB::beginTransaction();
+
+    //     try {
+
+    //         $total = 0;
+
+    //         // ==============================
+    //         // 2️⃣ CEK STOK
+    //         // ==============================
+    //         foreach ($cart as $id => $item) {
+
+    //             $product = Product::with('stocks')->findOrFail($id);
+
+    //             $stockIn  = $product->stocks()->where('type', 'in')->sum('quantity');
+    //             $stockOut = $product->stocks()->where('type', 'out')->sum('quantity');
+    //             $currentStock = $stockIn - $stockOut;
+
+    //             if ($currentStock < $item['qty']) {
+    //                 DB::rollBack();
+    //                 return back()->with(
+    //                     'error',
+    //                     'Stok tidak cukup untuk produk ' . $product->name
+    //                 );
+    //             }
+
+    //             $total += $item['price'] * $item['qty'];
+    //         }
+
+    //         // ==============================
+    //         // 3️⃣ INVOICE
+    //         // ==============================
+    //         $invoice = 'INV-' . time();
+
+    //         // ==============================
+    //         // 4️⃣ HANDLE PEMBAYARAN
+    //         // ==============================
+    //         $paymentProof = null;
+    //         $cashAmount   = null;
+    //         $changeAmount = null;
+    //         $status       = 'pending';
+
+    //         // 🔹 TRANSFER
+    //         if ($request->payment_method === 'transfer') {
+
+    //             $file = $request->file('payment_proof');
+    //             $paymentProof = $invoice . '.' . $file->getClientOriginalExtension();
+    //             $file->storeAs('payment_proof', $paymentProof, 'public');
+
+    //             $status = 'paid'; // bisa juga 'pending' kalau mau approval admin
+    //         }
+
+    //         // 🔹 CASH
+    //         if ($request->payment_method === 'cash') {
+
+    //             $cashAmount   = $request->cash_amount;
+    //             $changeAmount = $cashAmount - $total;
+
+    //             if ($changeAmount < 0) {
+    //                 DB::rollBack();
+    //                 return back()->with('error', 'Uang bayar kurang');
+    //             }
+
+    //             $status = 'approved'; // cash langsung lunas
+    //         }
+
+    //         // ==============================
+    //         // 5️⃣ SIMPAN ORDER
+    //         // ==============================
+    //         $order = Order::create([
+    //             'user_id'        => Auth::id(),
+    //             'invoice'        => $invoice,
+    //             'total'          => $total,
+    //             'payment_method' => $request->payment_method,
+    //             'payment_proof' => $paymentProof,
+    //             'cash_amount'   => $cashAmount,
+    //             'change_amount' => $changeAmount,
+    //             'status'        => $status,
+    //         ]);
+
+    //         // ==============================
+    //         // 6️⃣ ORDER ITEM + STOCK OUT
+    //         // ==============================
+    //         foreach ($cart as $id => $item) {
+
+    //             OrderItem::create([
+    //                 'order_id'  => $order->id,
+    //                 'product_id' => $id,
+    //                 'qty'       => $item['qty'],
+    //                 'price'     => $item['price'],
+    //             ]);
+
+    //             Stock::create([
+    //                 'product_id' => $id,
+    //                 'quantity'  => $item['qty'],
+    //                 'type'      => 'out',
+    //                 'note'      => 'Penjualan - Invoice ' . $invoice,
+    //             ]);
+    //         }
+
+    //         // ==============================
+    //         // 7️⃣ CLEAR CART
+    //         // ==============================
+    //         session()->forget('cart');
+
+    //         DB::commit();
+
+    //         return redirect()
+    //             ->route('customer.catalog')
+    //             ->with('success', 'Transaksi berhasil');
+    //     } catch (\Exception $e) {
+
+    //         DB::rollBack();
+
+    //         return back()->with('error', $e->getMessage());
+    //     }
+    // }
+
     public function checkout(Request $request)
-    {
-        // ==============================
-        // 1️⃣ VALIDASI DINAMIS
-        // ==============================
+{
+    $cart = session()->get('cart');
+
+    if (!$cart || count($cart) == 0) {
+        return back()->with('error', 'Keranjang kosong');
+    }
+
+    DB::beginTransaction();
+
+    try {
+
+        $total = 0;
+
+        // ================= HITUNG TOTAL & CEK STOK =================
+        foreach ($cart as $id => $item) {
+
+            $product = Product::with('stocks')->findOrFail($id);
+
+            $stockIn  = $product->stocks()->where('type', 'in')->sum('quantity');
+            $stockOut = $product->stocks()->where('type', 'out')->sum('quantity');
+            $currentStock = $stockIn - $stockOut;
+
+            if ($currentStock < $item['qty']) {
+                DB::rollBack();
+                return back()->with('error', 'Stok tidak cukup untuk ' . $product->name);
+            }
+
+            $total += $item['price'] * $item['qty'];
+        }
+
+        // ================= VALIDASI DINAMIS =================
         $request->validate([
             'payment_method' => 'required|in:cash,transfer',
-
-            // Transfer
-            'payment_proof' => 'required_if:payment_method,transfer|image|max:2048',
-
-            // Cash
-            'cash_amount' => 'required_if:payment_method,cash|numeric|min:0',
         ]);
 
-        $cart = session()->get('cart');
-
-        if (!$cart || count($cart) == 0) {
-            return back()->with('error', 'Keranjang kosong');
+        if ($request->payment_method === 'cash') {
+            $request->validate([
+                'cash_amount' => 'required|numeric|min:' . $total,
+            ]);
         }
 
-        DB::beginTransaction();
+        if ($request->payment_method === 'transfer') {
+            $request->validate([
+                'payment_proof' => 'required|image|max:2048',
+            ]);
+        }
 
-        try {
+        // ================= INVOICE =================
+        $invoice = 'INV-' . time();
 
-            $total = 0;
+        $paymentProof = null;
+        $cashAmount   = null;
+        $changeAmount = null;
+        $status       = 'pending';
 
-            // ==============================
-            // 2️⃣ CEK STOK
-            // ==============================
-            foreach ($cart as $id => $item) {
+        // ================= TRANSFER =================
+        if ($request->payment_method === 'transfer') {
 
-                $product = Product::with('stocks')->findOrFail($id);
+            $file = $request->file('payment_proof');
+            $filename = $invoice . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('payment_proof', $filename, 'public');
 
-                $stockIn  = $product->stocks()->where('type', 'in')->sum('quantity');
-                $stockOut = $product->stocks()->where('type', 'out')->sum('quantity');
-                $currentStock = $stockIn - $stockOut;
+            $paymentProof = $filename;
 
-                if ($currentStock < $item['qty']) {
-                    DB::rollBack();
-                    return back()->with(
-                        'error',
-                        'Stok tidak cukup untuk produk ' . $product->name
-                    );
-                }
+            // Transfer menunggu konfirmasi admin
+            $status = 'pending';
+        }
 
-                $total += $item['price'] * $item['qty'];
-            }
+        // ================= CASH =================
+        if ($request->payment_method === 'cash') {
 
-            // ==============================
-            // 3️⃣ INVOICE
-            // ==============================
-            $invoice = 'INV-' . time();
+            $cashAmount   = $request->cash_amount;
+            $changeAmount = $cashAmount - $total;
 
-            // ==============================
-            // 4️⃣ HANDLE PEMBAYARAN
-            // ==============================
-            $paymentProof = null;
-            $cashAmount   = null;
-            $changeAmount = null;
-            $status       = 'pending';
+            $status = 'approved';
+        }
 
-            // 🔹 TRANSFER
-            if ($request->payment_method === 'transfer') {
+        // ================= SIMPAN ORDER =================
+        $order = Order::create([
+            'user_id'        => Auth::id(),
+            'invoice'        => $invoice,
+            'total'          => $total,
+            'payment_method' => $request->payment_method,
+            'payment_proof'  => $paymentProof,
+            'cash_amount'    => $cashAmount,
+            'change_amount'  => $changeAmount,
+            'status'         => $status,
+        ]);
 
-                $file = $request->file('payment_proof');
-                $paymentProof = $invoice . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('payment_proof', $paymentProof, 'public');
+        // ================= ORDER ITEM & STOCK OUT =================
+        foreach ($cart as $id => $item) {
 
-                $status = 'paid'; // bisa juga 'pending' kalau mau approval admin
-            }
-
-            // 🔹 CASH
-            if ($request->payment_method === 'cash') {
-
-                $cashAmount   = $request->cash_amount;
-                $changeAmount = $cashAmount - $total;
-
-                if ($changeAmount < 0) {
-                    DB::rollBack();
-                    return back()->with('error', 'Uang bayar kurang');
-                }
-
-                $status = 'approved'; // cash langsung lunas
-            }
-
-            // ==============================
-            // 5️⃣ SIMPAN ORDER
-            // ==============================
-            $order = Order::create([
-                'user_id'        => Auth::id(),
-                'invoice'        => $invoice,
-                'total'          => $total,
-                'payment_method' => $request->payment_method,
-                'payment_proof' => $paymentProof,
-                'cash_amount'   => $cashAmount,
-                'change_amount' => $changeAmount,
-                'status'        => $status,
+            OrderItem::create([
+                'order_id'   => $order->id,
+                'product_id' => $id,
+                'qty'        => $item['qty'],
+                'price'      => $item['price'],
             ]);
 
-            // ==============================
-            // 6️⃣ ORDER ITEM + STOCK OUT
-            // ==============================
-            foreach ($cart as $id => $item) {
-
-                OrderItem::create([
-                    'order_id'  => $order->id,
-                    'product_id' => $id,
-                    'qty'       => $item['qty'],
-                    'price'     => $item['price'],
-                ]);
-
-                Stock::create([
-                    'product_id' => $id,
-                    'quantity'  => $item['qty'],
-                    'type'      => 'out',
-                    'note'      => 'Penjualan - Invoice ' . $invoice,
-                ]);
-            }
-
-            // ==============================
-            // 7️⃣ CLEAR CART
-            // ==============================
-            session()->forget('cart');
-
-            DB::commit();
-
-            return redirect()
-                ->route('customer.catalog')
-                ->with('success', 'Transaksi berhasil');
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
+            Stock::create([
+                'product_id' => $id,
+                'quantity'   => $item['qty'],
+                'type'       => 'out',
+                'note'       => 'Penjualan - Invoice ' . $invoice,
+            ]);
         }
+
+        session()->forget('cart');
+
+        DB::commit();
+
+        return redirect()
+            ->route('customer.catalog')
+            ->with('success', 'Transaksi berhasil');
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return back()->with('error', $e->getMessage());
     }
+}
 
 
     public function history()

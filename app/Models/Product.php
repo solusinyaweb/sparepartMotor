@@ -8,6 +8,11 @@ class Product extends Model
 {
     protected $guarded = [];
 
+    public function categoryRelation()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
     public function stocks()
     {
         return $this->hasMany(Stock::class);
