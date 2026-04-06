@@ -73,8 +73,13 @@
             border-bottom: 1px solid #eee;
         }
 
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
 
         /* Bagian Total */
         .summary-wrapper {
@@ -114,7 +119,9 @@
 
         /* CSS khusus cetak */
         @print {
-            body { padding: 0; }
+            body {
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -123,8 +130,8 @@
 
     <div class="invoice-header">
         <div class="company-info">
-            <h1>LYORA SPAREPART</h1>
-            <p>Alamat Lengkap Toko, Kota<br>Telp: 0812-3456-7890</p>
+            <h1>Bengkel Sparepart Motor Lyora</h1>
+            <p>Jl. Sisingamangaraja No.172 KM 10<br>Telp: 0812-6471-5023</p>
         </div>
         <div class="invoice-details">
             <h2 style="margin-top: 0; color: #7f8c8d;">INVOICE</h2>

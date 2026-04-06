@@ -217,16 +217,16 @@
 
                             {{-- ================= METODE PEMBAYARAN ================= --}}
                             <div class="mb-3">
-                                <label class="form-label fw-bold small">Metode Pembayaran</label>
-                                <select name="payment_method" id="payment_method" class="form-select"
+                                <label class="form-label fw-bold small">Metode Pembayaran (Transfer Bank)</label>
+                                {{-- <select name="payment_method" id="payment_method" class="form-select"
                                     onchange="handlePaymentChange()" required>
                                     <option value="cash">Cash</option>
                                     <option value="transfer">Transfer Bank</option>
-                                </select>
+                                </select> --}}
                             </div>
 
                             {{-- ================= CASH SECTION ================= --}}
-                            <div id="cash_section">
+                            {{-- <div id="cash_section">
                                 <div class="mb-3">
                                     <label class="form-label small">Nominal Uang Bayar</label>
                                     <div class="input-group">
@@ -242,10 +242,10 @@
                                         <span id="change_display" class="fw-bold text-success">Rp 0</span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             {{-- ================= TRANSFER SECTION ================= --}}
-                            <div id="transfer_section" style="display:none;">
+                            <div id="transfer_section" >
                                 <div class="mb-3">
                                     <label class="form-label small">
                                         Upload Bukti Transfer
